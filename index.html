@@ -8,73 +8,68 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <style>
-        body { background-color: #0a0a0a; color: white; overflow: hidden; font-family: sans-serif; }
+        body { background-color: #080808; color: white; overflow: hidden; font-family: 'Inter', sans-serif; }
         .bg-gradient-custom { background: linear-gradient(135deg, #ff8c00, #22c55e, #ec4899, #a855f7); }
-        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); }
         .btn-action { transition: all 0.2s; border-width: 2px; }
-        .btn-action:active { transform: scale(0.95); }
-        .dynamic-border { border-width: 2px; border-style: solid; }
+        .btn-action:active { transform: scale(0.9); }
+        .dynamic-border { border-width: 2px; border-style: solid; transition: border-color 0.3s ease; }
         #config-modal { display: none; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
     </style>
 </head>
 <body class="h-screen flex flex-col items-center justify-center p-4">
 
-    <button id="btn-config" onclick="toggleModal(true)" class="fixed top-4 right-4 text-2xl z-50 p-2 glass rounded-full dynamic-border border-white/20">⚙️</button>
+    <button id="btn-config" onclick="toggleModal(true)" class="fixed top-4 right-4 text-xl z-50 p-3 glass rounded-full dynamic-border border-white/10">⚙️</button>
 
-    <div id="lobby-header" class="text-center mb-6">
-        <h1 class="text-2xl font-bold bg-gradient-custom bg-clip-text text-transparent italic uppercase tracking-tighter">Call Base</h1>
+    <div id="lobby-elements" class="text-center w-full max-w-md">
+        <h1 class="text-3xl font-black bg-gradient-custom bg-clip-text text-transparent italic mb-8 tracking-tighter">CALL BASE</h1>
+        
+        <div id="login-screen" class="glass p-8 rounded-[2rem] shadow-2xl dynamic-border">
+            <input type="text" id="username" placeholder="Seu nome" class="w-full p-4 rounded-2xl bg-white/5 border-2 border-white/10 mb-6 focus:outline-none focus:border-white/30 transition text-center text-lg">
+            <button onclick="connect()" class="w-full py-4 rounded-2xl bg-gradient-custom font-black text-xl hover:opacity-90 btn-action border-white/20">ENTRAR AGORA</button>
+        </div>
+
+        <footer class="mt-8 text-gray-500 text-xs">
+            Made By: <a href="https://instagram.com/085_Teuzinnn" target="_blank" class="text-blue-500 font-bold">@085_Teuzinnn</a>
+        </footer>
     </div>
 
-    <div id="login-screen" class="w-full max-w-md glass p-8 rounded-3xl shadow-2xl text-center dynamic-border">
-        <input type="text" id="username" placeholder="Seu nome" class="w-full p-4 rounded-2xl bg-white/10 border-2 border-white/10 mb-4 focus:outline-none focus:border-white/40 transition text-white">
-        <button onclick="connect()" class="w-full py-4 rounded-2xl bg-gradient-custom font-bold text-lg hover:opacity-90 btn-action border-white/20">Conectar</button>
-    </div>
-
-    <div id="call-screen" class="hidden w-full max-w-md h-[80vh] flex flex-col glass rounded-3xl overflow-hidden shadow-2xl dynamic-border">
-        <div class="p-4 border-b-2 border-white/10 flex justify-between items-center bg-white/5">
-            <h1 class="text-xs font-bold italic opacity-50">CALL BASE</h1>
-            <div class="flex items-center gap-3">
-                <button onclick="clearChat()" class="text-lg hover:scale-110 transition" title="Limpar Chat">🧹</button>
-                <span id="user-display" class="text-xs font-mono px-2 py-1 rounded bg-white/10"></span>
-            </div>
+    <div id="call-screen" class="hidden w-full max-w-md h-[85vh] flex flex-col glass rounded-[2.5rem] overflow-hidden shadow-2xl dynamic-border">
+        <div class="p-5 border-b-2 border-white/5 flex justify-between items-center bg-white/5">
+            <button onclick="clearChat()" class="text-xl hover:rotate-12 transition">🧹</button>
+            <span id="user-display" class="text-xs font-black tracking-widest uppercase opacity-70"></span>
+            <div class="w-6"></div>
         </div>
         
-        <div id="chat-box" class="flex-1 p-4 overflow-y-auto space-y-3 text-sm flex flex-col"></div>
+        <div id="chat-box" class="flex-1 p-5 overflow-y-auto space-y-4 flex flex-col scroll-smooth"></div>
 
-        <div class="p-4 space-y-4 bg-white/10 border-t-2 border-white/10">
-            <div class="flex gap-2">
-                <input type="text" id="msg-input" placeholder="Mensagem..." class="flex-1 p-3 rounded-xl bg-black/40 border-2 border-white/10 focus:outline-none text-sm">
-                <button onclick="sendMsg()" class="px-4 py-2 bg-white/10 rounded-xl font-bold btn-action border-white/20">SMS</button>
+        <div class="p-6 space-y-5 bg-black/20 border-t-2 border-white/5">
+            <div class="flex gap-3">
+                <input type="text" id="msg-input" placeholder="Enviar SMS..." class="flex-1 p-4 rounded-2xl bg-white/5 border-2 border-white/10 focus:outline-none text-sm">
+                <button onclick="sendMsg()" class="px-6 py-2 bg-white/10 rounded-2xl font-bold btn-action border-white/10">SMS</button>
             </div>
-            <div class="flex justify-center items-center gap-6 pb-2">
-                <button id="mic-btn" onclick="toggleMic()" class="w-14 h-14 flex items-center justify-center rounded-full bg-green-600 btn-action border-white/20 shadow-lg shadow-green-900/20">
-                    <svg id="mic-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+            <div class="flex justify-center items-center gap-10 pb-2">
+                <button id="mic-btn" onclick="toggleMic()" class="w-16 h-16 flex items-center justify-center rounded-full bg-green-600 btn-action border-white/20">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
                 </button>
-                <button onclick="hangUp()" class="w-14 h-14 flex items-center justify-center rounded-full bg-red-600 btn-action border-white/20 shadow-lg shadow-red-900/20">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.209.435l-1.13 1.883a15.047 15.047 0 01-8.284-8.284l1.883-1.13a1 1 0 00.435-1.209L7.228 3.684A1 1 0 006.28 3H5z"></path></svg>
+                <button onclick="hangUp()" class="w-16 h-16 flex items-center justify-center rounded-full bg-red-600 btn-action border-white/20">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.209.435l-1.13 1.883a15.047 15.047 0 01-8.284-8.284l1.883-1.13a1 1 0 00.435-1.209L7.228 3.684A1 1 0 006.28 3H5z"></path></svg>
                 </button>
             </div>
         </div>
     </div>
 
-    <footer id="lobby-footer" class="text-center mt-5 text-gray-500 text-sm">
-        Made By: <a href="https://instagram.com/085_Teuzinnn" target="_blank" class="text-blue-400 hover:text-blue-300 font-semibold transition duration-200">@085_Teuzinnn</a>
-    </footer>
-
-    <div id="config-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[100] p-6 backdrop-blur-sm">
-        <div class="glass p-8 rounded-3xl w-full max-w-xs text-center dynamic-border border-white/20">
-            <h2 class="text-xl font-bold mb-6">Ajustes</h2>
-            <p class="text-xs mb-4 uppercase tracking-widest opacity-60">Cor do Tema:</p>
-            <div class="grid grid-cols-2 gap-3 mb-8">
-                <button onclick="changeBorder('#ff8c00')" class="p-4 rounded-xl bg-[#ff8c00] border-2 border-white/40"></button>
-                <button onclick="changeBorder('#22c55e')" class="p-4 rounded-xl bg-[#22c55e] border-2 border-white/40"></button>
-                <button onclick="changeBorder('#ec4899')" class="p-4 rounded-xl bg-[#ec4899] border-2 border-white/40"></button>
-                <button onclick="changeBorder('#a855f7')" class="p-4 rounded-xl bg-[#a855f7] border-2 border-white/40"></button>
+    <div id="config-modal" class="fixed inset-0 bg-black/95 flex items-center justify-center z-[100] p-6">
+        <div class="glass p-8 rounded-[2.5rem] w-full max-w-xs text-center dynamic-border">
+            <h2 class="text-2xl font-black mb-8 italic">CONFIGS</h2>
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <button onclick="changeBorder('#ff8c00')" class="p-5 rounded-2xl bg-[#ff8c00] border-2 border-white/20"></button>
+                <button onclick="changeBorder('#22c55e')" class="p-5 rounded-2xl bg-[#22c55e] border-2 border-white/20"></button>
+                <button onclick="changeBorder('#ec4899')" class="p-5 rounded-2xl bg-[#ec4899] border-2 border-white/20"></button>
+                <button onclick="changeBorder('#a855f7')" class="p-5 rounded-2xl bg-[#a855f7] border-2 border-white/20"></button>
             </div>
-            <button onclick="clearName()" class="w-full py-3 mb-4 rounded-xl bg-white/5 font-bold border-2 border-white/10 hover:bg-white/10 transition">Limpar Nome</button>
-            <button onclick="toggleModal(false)" class="w-full py-3 rounded-xl bg-white font-bold text-black border-2 border-transparent">Salvar</button>
+            <button onclick="clearName()" class="w-full py-4 mb-4 rounded-2xl bg-white/5 font-bold border-2 border-white/10">LIMPAR NOME</button>
+            <button onclick="toggleModal(false)" class="w-full py-4 rounded-2xl bg-white text-black font-black">VOLTAR</button>
         </div>
     </div>
 
@@ -91,114 +86,95 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        let localStream, myName = "", isMicOn = true;
-        let peerConnections = {};
+        let localStream, myName = "", isMicOn = true, pcs = {};
 
         const savedName = localStorage.getItem('callbase_name');
         if(savedName) document.getElementById('username').value = savedName;
-        
         const savedColor = localStorage.getItem('callbase_color') || '#ff8c00';
         applyBorderColor(savedColor);
 
-        function toggleModal(show) { document.getElementById('config-modal').style.display = show ? 'flex' : 'none'; }
-        function changeBorder(color) { localStorage.setItem('callbase_color', color); applyBorderColor(color); }
-        function applyBorderColor(color) { document.querySelectorAll('.dynamic-border').forEach(el => el.style.borderColor = color); }
+        function toggleModal(s) { document.getElementById('config-modal').style.display = s ? 'flex' : 'none'; }
+        function changeBorder(c) { localStorage.setItem('callbase_color', c); applyBorderColor(c); }
+        function applyBorderColor(c) { document.querySelectorAll('.dynamic-border').forEach(e => e.style.borderColor = c); }
         function clearName() { localStorage.removeItem('callbase_name'); document.getElementById('username').value = ""; }
 
         async function connect() {
-            const input = document.getElementById('username');
-            myName = input.value.trim();
-            if (!myName) return alert("Insira um nome!");
-            const snapshot = await db.ref('users').once('value');
-            if (Object.values(snapshot.val() || {}).includes(myName)) return alert("Nome em uso!");
+            const nick = document.getElementById('username').value.trim();
+            if (!nick) return;
+            const snap = await db.ref('users').once('value');
+            if (Object.values(snap.val() || {}).includes(nick)) return alert("Nome já existe!");
             
+            myName = nick;
             localStorage.setItem('callbase_name', myName);
-            db.ref('users').push(myName).onDisconnect().remove();
+            const myRef = db.ref('users').push(myName);
+            myRef.onDisconnect().remove();
 
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('lobby-header').classList.add('hidden');
-            document.getElementById('lobby-footer').classList.add('hidden');
+            document.getElementById('lobby-elements').classList.add('hidden');
             document.getElementById('btn-config').classList.add('hidden');
             document.getElementById('call-screen').classList.remove('hidden');
-            document.getElementById('user-display').innerText = `@${myName}`;
+            document.getElementById('user-display').innerText = myName;
 
-            initCall();
+            startP2P();
             setupChat();
         }
 
-        async function initCall() {
+        async function startP2P() {
             localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            db.ref('messages').push({ system: true, text: `${myName} conectou.` });
+            db.ref('messages').push({ system: true, text: `${myName} entrou na call.` });
 
-            db.ref('users').on('child_added', async (snap) => {
-                const user = snap.val();
-                if (user !== myName) {
-                    createPeer(user, true);
-                }
+            db.ref('users').on('child_added', (s) => {
+                const user = s.val();
+                if (user !== myName) makeCall(user);
             });
 
-            db.ref(`signal/${myName}`).on('child_added', async (snap) => {
-                const { from, type, data } = snap.val();
-                if (!peerConnections[from]) createPeer(from, false);
-                const pc = peerConnections[from];
-
+            db.ref(`calls/${myName}`).on('child_added', async (s) => {
+                const { from, type, signal } = s.val();
+                if (!pcs[from]) initPeer(from, false);
                 if (type === 'offer') {
-                    await pc.setRemoteDescription(new RTCSessionDescription(data));
-                    const answer = await pc.createAnswer();
-                    await pc.setLocalDescription(answer);
-                    sendSignal(from, 'answer', answer);
+                    await pcs[from].setRemoteDescription(new RTCSessionDescription(signal));
+                    const ans = await pcs[from].createAnswer();
+                    await pcs[from].setLocalDescription(ans);
+                    db.ref(`calls/${from}`).push({ from: myName, type: 'answer', signal: ans });
                 } else if (type === 'answer') {
-                    await pc.setRemoteDescription(new RTCSessionDescription(data));
-                } else if (type === 'candidate') {
-                    pc.addIceCandidate(new RTCIceCandidate(data));
+                    await pcs[from].setRemoteDescription(new RTCSessionDescription(signal));
+                } else if (type === 'ice') {
+                    pcs[from].addIceCandidate(new RTCIceCandidate(signal));
                 }
             });
         }
 
-        function createPeer(targetUser, isOfferer) {
+        function initPeer(target, isOfferer) {
             const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
-            peerConnections[targetUser] = pc;
-
+            pcs[target] = pc;
             localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-
             pc.ontrack = (e) => {
-                let audio = document.getElementById(`audio-${targetUser}`);
-                if (!audio) {
-                    audio = document.createElement('audio');
-                    audio.id = `audio-${targetUser}`;
-                    audio.autoplay = true;
-                    document.body.appendChild(audio);
-                }
+                const audio = new Audio();
                 audio.srcObject = e.streams[0];
+                audio.autoplay = true;
             };
-
             pc.onicecandidate = (e) => {
-                if (e.candidate) sendSignal(targetUser, 'candidate', e.candidate);
+                if (e.candidate) db.ref(`calls/${target}`).push({ from: myName, type: 'ice', signal: e.candidate });
             };
-
-            if (isOfferer) {
-                pc.onnegotiationneeded = async () => {
-                    const offer = await pc.createOffer();
-                    await pc.setLocalDescription(offer);
-                    sendSignal(targetUser, 'offer', offer);
-                };
-            }
+            return pc;
         }
 
-        function sendSignal(to, type, data) {
-            db.ref(`signal/${to}`).push({ from: myName, type, data });
+        async function makeCall(target) {
+            const pc = initPeer(target, true);
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            db.ref(`calls/${target}`).push({ from: myName, type: 'offer', signal: offer });
         }
 
         function setupChat() {
-            db.ref('messages').on('value', (snap) => {
+            db.ref('messages').on('value', (s) => {
                 const box = document.getElementById('chat-box');
                 box.innerHTML = "";
-                snap.forEach(child => {
-                    const data = child.val();
+                const theme = localStorage.getItem('callbase_color') || '#ff8c00';
+                s.forEach(c => {
+                    const d = c.val();
                     const div = document.createElement('div');
-                    const themeColor = localStorage.getItem('callbase_color') || '#ff8c00';
-                    div.className = data.system ? "text-center text-gray-500 italic text-[10px] my-1" : "bg-white/5 p-3 rounded-2xl w-fit max-w-[90%] border border-white/5 self-start";
-                    div.innerHTML = data.system ? data.text : `<span style="color:${themeColor}" class="font-bold text-xs block mb-1">${data.user}</span><span class="text-white/90">${data.text}</span>`;
+                    div.className = d.system ? "text-center text-gray-600 text-[10px] uppercase font-bold" : "bg-white/5 p-4 rounded-2xl border border-white/5 self-start max-w-[85%]";
+                    div.innerHTML = d.system ? d.text : `<span style="color:${theme}" class="text-[10px] font-black block mb-1 uppercase">${d.user}</span><p class="text-sm opacity-90">${d.text}</p>`;
                     box.appendChild(div);
                 });
                 box.scrollTop = box.scrollHeight;
@@ -206,22 +182,20 @@
         }
 
         function sendMsg() {
-            const input = document.getElementById('msg-input');
-            if (!input.value.trim()) return;
-            db.ref('messages').push({ user: myName, text: input.value });
-            input.value = "";
+            const i = document.getElementById('msg-input');
+            if (!i.value.trim()) return;
+            db.ref('messages').push({ user: myName, text: i.value });
+            i.value = "";
         }
 
-        function clearChat() {
-            if(confirm("Limpar conversa para todos?")) db.ref('messages').remove();
-        }
+        function clearChat() { if(confirm("Limpar para todos?")) db.ref('messages').remove(); }
 
         function toggleMic() {
             isMicOn = !isMicOn;
             localStream.getAudioTracks()[0].enabled = isMicOn;
-            const btn = document.getElementById('mic-btn');
-            btn.classList.toggle('bg-green-600', isMicOn);
-            btn.classList.toggle('bg-red-600', !isMicOn);
+            const b = document.getElementById('mic-btn');
+            b.classList.toggle('bg-green-600', isMicOn);
+            b.classList.toggle('bg-red-600', !isMicOn);
         }
 
         function hangUp() { location.reload(); }
