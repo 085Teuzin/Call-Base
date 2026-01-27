@@ -3,83 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Call Base - Made By: @085_Teuzinnn</title>
+    <title>Call Base Pro - @085_Teuzinnn</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        body { background-color: #080808; color: white; overflow: hidden; font-family: sans-serif; }
+        body { background-color: #060606; color: white; overflow: hidden; font-family: 'Inter', sans-serif; height: 100dvh; }
         .bg-gradient-custom { background: linear-gradient(135deg, #ff8c00, #22c55e, #ec4899, #a855f7); }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); }
-        .btn-action { transition: all 0.2s; border-width: 2px; }
-        .btn-action:active { transform: scale(0.9); }
-        .dynamic-border { border-width: 2px; border-style: solid; border-color: rgba(255,255,255,0.1); }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .btn-action { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); border-width: 2px; }
+        .btn-action:active { transform: scale(0.92); opacity: 0.8; }
+        .dynamic-border { border-width: 2px; border-style: solid; transition: border-color 0.4s; }
         .modal-hidden { display: none !important; }
         .modal-flex { display: flex !important; }
+        #chat-messages::-webkit-scrollbar { width: 4px; }
+        #chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .msg-anim { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="h-screen flex flex-col items-center justify-center p-4">
+<body class="flex flex-col items-center justify-center p-4">
 
-    <button id="btn-config" onclick="toggleM('config-modal', true)" class="fixed top-4 right-4 text-xl z-50 p-3 glass rounded-full dynamic-border">⚙️</button>
+    <button id="btn-config" onclick="toggleM('config-modal', true)" class="fixed top-4 right-4 text-xl z-50 p-3 glass rounded-full dynamic-border shadow-lg">⚙️</button>
 
-    <div id="lobby-ui" class="text-center w-full max-w-md">
-        <h1 class="text-3xl font-black bg-gradient-custom bg-clip-text text-transparent italic mb-8 uppercase italic">Call Base</h1>
-        <div class="glass p-8 rounded-[2rem] shadow-2xl dynamic-border">
-            <input type="text" id="username" placeholder="Seu apelido" class="w-full p-4 rounded-2xl bg-white/5 border-2 border-white/10 mb-6 focus:outline-none focus:border-white/30 text-center text-lg text-white">
-            <button onclick="connect()" class="w-full py-4 rounded-2xl bg-gradient-custom font-black text-xl hover:opacity-90 btn-action border-white/20">CONECTAR</button>
+    <div id="lobby-ui" class="text-center w-full max-w-md animate-fade-in">
+        <h1 class="text-4xl font-black bg-gradient-custom bg-clip-text text-transparent italic mb-2 uppercase tracking-tighter">Call Base</h1>
+        <p class="text-gray-500 text-[10px] tracking-[0.3em] uppercase mb-8">Secure Voice & Protocol</p>
+        
+        <div class="glass p-8 rounded-[2.5rem] shadow-2xl dynamic-border">
+            <input type="text" id="username" maxlength="15" placeholder="Seu apelido..." class="w-full p-4 rounded-2xl bg-white/5 border-2 border-white/10 mb-6 focus:outline-none focus:border-white/40 text-center text-lg text-white transition-all">
+            <button onclick="connect()" id="connect-btn" class="w-full py-4 rounded-2xl bg-gradient-custom font-black text-xl hover:opacity-90 btn-action border-white/20 shadow-xl">CONECTAR</button>
         </div>
-        <footer class="mt-8 text-gray-500 text-xs italic">Made By: @085_Teuzinnn</footer>
+        <footer class="mt-8 text-gray-600 text-[10px] font-medium tracking-widest">MADE BY: @085_TEUZINNN</footer>
     </div>
 
-    <div id="call-ui" class="hidden w-full max-w-md h-[85vh] flex flex-col glass rounded-[2.5rem] overflow-hidden shadow-2xl dynamic-border">
+    <div id="call-ui" class="hidden w-full max-w-md h-[88vh] flex flex-col glass rounded-[2.5rem] overflow-hidden shadow-2xl dynamic-border">
         <div class="p-5 border-b-2 border-white/5 flex justify-between items-center bg-white/5">
-            <div class="flex gap-4">
-                <button onclick="toggleM('users-modal', true)" class="text-xl">👥️</button>
-                <button onclick="clearChat()" class="text-xl">🧹</button>
-            </div>
-            <span id="user-display" class="text-[10px] font-black tracking-widest uppercase opacity-60"></span>
-            <div class="w-10"></div>
-        </div>
-        <div id="chat-messages" class="flex-1 p-5 overflow-y-auto space-y-4 flex flex-col"></div>
-        <div class="p-6 space-y-5 bg-black/20 border-t-2 border-white/5">
             <div class="flex gap-3">
-                <input type="text" id="msg-input" placeholder="SMS..." class="flex-1 p-4 rounded-2xl bg-white/5 border-2 border-white/10 focus:outline-none text-sm text-white">
-                <button onclick="send()" class="px-5 py-2 bg-white/10 rounded-2xl font-bold btn-action border-white/10">SMS</button>
+                <button onclick="toggleM('users-modal', true)" class="p-2 glass rounded-xl text-lg hover:bg-white/10 transition">👥</button>
+                <button onclick="clearChat()" class="p-2 glass rounded-xl text-lg hover:bg-red-500/20 transition">🧹</button>
             </div>
-            <div class="flex justify-center items-center gap-10">
-                <button id="mic-btn" onclick="toggleMic()" class="w-14 h-14 flex items-center justify-center rounded-full bg-green-600 btn-action border-white/20">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+            <div class="text-center">
+                <span id="user-display" class="text-[10px] font-black tracking-widest uppercase text-white/80"></span>
+                <div id="connection-status" class="text-[8px] text-green-500 font-bold uppercase mt-1">● Online</div>
+            </div>
+            <div class="w-12"></div>
+        </div>
+
+        <div id="chat-messages" class="flex-1 p-5 overflow-y-auto space-y-4 flex flex-col bg-black/10">
+            </div>
+
+        <div class="p-6 space-y-5 bg-black/40 border-t-2 border-white/5 backdrop-blur-md">
+            <div class="flex gap-3">
+                <input type="text" id="msg-input" autocomplete="off" placeholder="Escreva uma mensagem..." class="flex-1 p-4 rounded-2xl bg-white/5 border-2 border-white/10 focus:outline-none focus:border-white/30 text-sm text-white">
+                <button onclick="send()" class="px-6 py-2 bg-white/10 rounded-2xl font-bold btn-action border-white/10 hover:bg-white/20">SMS</button>
+            </div>
+            
+            <div class="flex justify-center items-center gap-12">
+                <button id="mic-btn" onclick="toggleMic()" class="w-16 h-16 flex items-center justify-center rounded-full bg-green-600 btn-action border-white/20 shadow-lg shadow-green-900/20">
+                    <svg id="mic-icon" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
                 </button>
-                <button onclick="hangUp()" class="w-14 h-14 flex items-center justify-center rounded-full bg-red-600 btn-action border-white/20">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.209.435l-1.13 1.883a15.047 15.047 0 01-8.284-8.284l1.883-1.13a1 1 0 00.435-1.209L7.228 3.684A1 1 0 006.28 3H5z"></path></svg>
+                <button onclick="hangUp()" class="w-16 h-16 flex items-center justify-center rounded-full bg-red-600 btn-action border-white/20 shadow-lg shadow-red-900/20 text-2xl">
+                    📞
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="config-modal" class="modal-hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[100] p-6">
-        <div class="glass p-8 rounded-[2.5rem] w-full max-w-xs text-center dynamic-border">
-            <h2 class="text-xl font-black mb-6 italic uppercase">Ajustes</h2>
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <button onclick="setTheme('#ff8c00')" class="p-5 rounded-2xl bg-[#ff8c00] border-2 border-white/20"></button>
-                <button onclick="setTheme('#22c55e')" class="p-5 rounded-2xl bg-[#22c55e] border-2 border-white/20"></button>
-                <button onclick="setTheme('#ec4899')" class="p-5 rounded-2xl bg-[#ec4899] border-2 border-white/20"></button>
-                <button onclick="setTheme('#a855f7')" class="p-5 rounded-2xl bg-[#a855f7] border-2 border-white/20"></button>
+    <div id="config-modal" class="modal-hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[100] p-6 backdrop-blur-sm">
+        <div class="glass p-8 rounded-[2.5rem] w-full max-w-xs text-center dynamic-border shadow-2xl">
+            <h2 class="text-xl font-black mb-6 italic uppercase tracking-widest text-white/90">Ajustes de Interface</h2>
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <button onclick="setTheme('#ff8c00')" class="h-12 rounded-2xl bg-[#ff8c00] border-2 border-white/20 hover:scale-105 transition"></button>
+                <button onclick="setTheme('#22c55e')" class="h-12 rounded-2xl bg-[#22c55e] border-2 border-white/20 hover:scale-105 transition"></button>
+                <button onclick="setTheme('#ec4899')" class="h-12 rounded-2xl bg-[#ec4899] border-2 border-white/20 hover:scale-105 transition"></button>
+                <button onclick="setTheme('#a855f7')" class="h-12 rounded-2xl bg-[#a855f7] border-2 border-white/20 hover:scale-105 transition"></button>
             </div>
-            <button onclick="clearN()" class="w-full py-3 mb-3 rounded-xl bg-white/5 font-bold border-2 border-white/10">LIMPAR NOME</button>
-            <button onclick="toggleM('config-modal', false)" class="w-full py-3 rounded-xl bg-white text-black font-black">VOLTAR</button>
+            <button onclick="clearN()" class="w-full py-4 mb-4 rounded-2xl bg-white/5 font-bold border-2 border-white/10 hover:bg-white/10 transition text-red-400">LIMPAR PERFIL</button>
+            <button onclick="toggleM('config-modal', false)" class="w-full py-4 rounded-2xl bg-white text-black font-black uppercase text-xs tracking-widest">SALVAR</button>
         </div>
     </div>
 
     <div id="users-modal" class="modal-hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[100] p-6">
-        <div class="glass p-6 rounded-[2rem] w-full max-w-xs dynamic-border">
-            <h2 class="text-center font-black mb-4 uppercase text-sm tracking-widest">Na Sala 👥️</h2>
-            <div id="users-list" class="space-y-2 mb-6 max-h-60 overflow-y-auto"></div>
-            <button onclick="toggleM('users-modal', false)" class="w-full py-3 rounded-xl bg-white/10 font-bold border-2 border-white/10">FECHAR</button>
+        <div class="glass p-7 rounded-[2.5rem] w-full max-w-xs dynamic-border shadow-2xl">
+            <h2 class="text-center font-black mb-5 uppercase text-xs tracking-[0.3em] text-white/50">Membros Online</h2>
+            <div id="users-list" class="space-y-3 mb-6 max-h-[40vh] overflow-y-auto pr-2"></div>
+            <button onclick="toggleM('users-modal', false)" class="w-full py-4 rounded-2xl bg-white/10 font-black border-2 border-white/10 text-[10px] tracking-widest uppercase">FECHAR PAINEL</button>
         </div>
     </div>
 
     <script>
+        // Configuração Firebase (Sua configuração original mantida)
         const config = {
             apiKey: "AIzaSyBq9-vsFpAgEtXJ--KH6knNKEpXXVgkGrc",
             authDomain: "conexao-geral-teuzin.firebaseapp.com",
@@ -93,96 +107,165 @@
         firebase.initializeApp(config);
         const db = firebase.database();
         let myNick, pc, stream, isMic = true;
-        const ice = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+        let pendingIceCandidates = [];
+        const ice = { iceServers: [{ urls: 'stun:stun1.l.google.com:19302' }, { urls: 'stun:stun2.l.google.com:19302' }] };
 
-        if(localStorage.getItem('cb_nick')) document.getElementById('username').value = localStorage.getItem('cb_nick');
+        // Carregamento Inicial
+        const savedNick = localStorage.getItem('cb_nick');
+        if(savedNick) document.getElementById('username').value = savedNick;
         applyTheme(localStorage.getItem('cb_color') || '#ff8c00');
 
         function toggleM(id, s) { 
             const el = document.getElementById(id);
-            s ? el.classList.replace('modal-hidden', 'modal-flex') : el.classList.replace('modal-flex', 'modal-hidden');
+            if(s) { el.classList.remove('modal-hidden'); el.classList.add('modal-flex'); }
+            else { el.classList.remove('modal-flex'); el.classList.add('modal-hidden'); }
         }
 
         function setTheme(c) { localStorage.setItem('cb_color', c); applyTheme(c); }
-        function applyTheme(c) { document.querySelectorAll('.dynamic-border').forEach(e => e.style.borderColor = c); }
-        function clearN() { localStorage.removeItem('cb_nick'); document.getElementById('username').value = ""; }
+        function applyTheme(c) { 
+            document.querySelectorAll('.dynamic-border').forEach(e => e.style.borderColor = c);
+            const btn = document.getElementById('connect-btn');
+            if(btn) btn.style.boxShadow = `0 10px 20px -10px ${c}66`;
+        }
+
+        function clearN() { localStorage.removeItem('cb_nick'); location.reload(); }
 
         async function connect() {
-            myNick = document.getElementById('username').value.trim();
-            if(!myNick) return alert("Digite um nome!");
+            const rawNick = document.getElementById('username').value.trim();
+            myNick = rawNick.replace(/[.#$[\]]/g, ""); // Sanitização para Firebase
+            
+            if(myNick.length < 3) return alert("Apelido muito curto!");
             
             const usersSnap = await db.ref('users').once('value');
-            if(Object.values(usersSnap.val() || {}).includes(myNick)) return alert("Nome já em uso!");
+            const currentUsers = Object.values(usersSnap.val() || {});
+            if(currentUsers.includes(myNick)) return alert("Este nome já está na sala!");
 
             localStorage.setItem('cb_nick', myNick);
-            db.ref('users').push(myNick).onDisconnect().remove();
+            const userRef = db.ref('users').push(myNick);
+            userRef.onDisconnect().remove();
 
             document.getElementById('lobby-ui').classList.add('hidden');
             document.getElementById('btn-config').classList.add('hidden');
             document.getElementById('call-ui').classList.remove('hidden');
             document.getElementById('user-display').innerText = `@${myNick}`;
 
-            initSignaling();
-            initChat();
-            initUsers();
+            startEngine();
         }
 
-        async function initSignaling() {
-            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            db.ref('msgs').push({ sys: true, txt: `▶️ ${myNick} entrou.` });
+        async function startEngine() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                db.ref('msgs').push({ sys: true, txt: `⚡ ${myNick} ESTÁ ONLINE` });
+                
+                setupSignaling();
+                initChat();
+                initUsers();
+            } catch (e) {
+                alert("Erro ao acessar microfone. Verifique as permissões!");
+                console.error(e);
+            }
+        }
 
+        function setupSignaling() {
             db.ref('call/signal').on('value', async s => {
                 const d = s.val();
-                if(!d) return;
-                if(d.type === 'offer' && d.from !== myNick) {
+                if(!d || d.from === myNick) return;
+
+                if(d.type === 'offer') {
                     if(!pc) setupPeer();
                     await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(d.sdp)));
                     const ans = await pc.createAnswer();
                     await pc.setLocalDescription(ans);
                     db.ref('call/signal').set({ type: 'answer', sdp: JSON.stringify(ans), from: myNick });
-                }
-                if(d.type === 'answer' && d.from !== myNick && pc) {
-                    await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(d.sdp)));
+                    processIceQueue();
+                } else if(d.type === 'answer') {
+                    if(pc) await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(d.sdp)));
+                    processIceQueue();
                 }
             });
 
             db.ref('call/ice').on('child_added', s => {
                 const c = JSON.parse(s.val());
-                if(pc && c.from !== myNick) pc.addIceCandidate(new RTCIceCandidate(c.cand));
+                if(c.from === myNick) return;
+                
+                const candidate = new RTCIceCandidate(c.cand);
+                if(pc && pc.remoteDescription) {
+                    pc.addIceCandidate(candidate);
+                } else {
+                    pendingIceCandidates.push(candidate);
+                }
             });
 
-            if(!pc) {
-                setupPeer();
-                const offer = await pc.createOffer();
-                await pc.setLocalDescription(offer);
-                db.ref('call/signal').set({ type: 'offer', sdp: JSON.stringify(offer), from: myNick });
+            // Inicia chamada se for o primeiro
+            setTimeout(async () => {
+                if(!pc) {
+                    setupPeer();
+                    const offer = await pc.createOffer();
+                    await pc.setLocalDescription(offer);
+                    db.ref('call/signal').set({ type: 'offer', sdp: JSON.stringify(offer), from: myNick });
+                }
+            }, 1000);
+        }
+
+        function processIceQueue() {
+            while(pendingIceCandidates.length > 0) {
+                pc.addIceCandidate(pendingIceCandidates.shift());
             }
         }
 
         function setupPeer() {
             pc = new RTCPeerConnection(ice);
             stream.getTracks().forEach(t => pc.addTrack(t, stream));
-            pc.onicecandidate = e => e.candidate && db.ref('call/ice').push(JSON.stringify({ from: myNick, cand: e.candidate }));
+            
+            pc.onicecandidate = e => {
+                if(e.candidate) {
+                    db.ref('call/ice').push(JSON.stringify({ from: myNick, cand: e.candidate }));
+                }
+            };
+
             pc.ontrack = e => {
                 const audio = new Audio();
                 audio.srcObject = e.streams[0];
                 audio.autoplay = true;
+                audio.play().catch(console.error);
+            };
+
+            pc.onconnectionstatechange = () => {
+                const status = document.getElementById('connection-status');
+                if(pc.connectionState === 'connected') {
+                    status.innerText = "● Conexão Segura";
+                    status.className = "text-[8px] text-green-400 font-bold uppercase mt-1";
+                }
             };
         }
 
         function initChat() {
-            db.ref('msgs').on('value', s => {
+            db.ref('msgs').limitToLast(50).on('value', s => {
                 const box = document.getElementById('chat-messages');
+                const isAtBottom = box.scrollHeight - box.clientHeight <= box.scrollTop + 100;
+                
                 box.innerHTML = "";
-                const color = localStorage.getItem('cb_color') || '#ff8c00';
+                const themeColor = localStorage.getItem('cb_color') || '#ff8c00';
+                
                 s.forEach(c => {
                     const d = c.val();
                     const div = document.createElement('div');
-                    div.className = d.sys ? "text-center text-gray-600 text-[9px] font-black uppercase" : "bg-white/5 p-4 rounded-2xl border border-white/5 self-start max-w-[85%]";
-                    div.innerHTML = d.sys ? d.txt : `<span style="color:${color}" class="text-[10px] font-black block mb-1 uppercase">${d.user}</span><p class="text-sm opacity-90">${d.txt}</p>`;
+                    
+                    if(d.sys) {
+                        div.className = "text-center text-[8px] font-black text-white/30 tracking-[0.2em] py-2 uppercase msg-anim";
+                        div.textContent = d.txt;
+                    } else {
+                        const isMine = d.user === myNick;
+                        div.className = `p-4 rounded-[1.5rem] border border-white/5 msg-anim flex flex-col ${isMine ? 'bg-white/10 self-end' : 'bg-white/5 self-start'} max-w-[85%] shadow-lg`;
+                        div.innerHTML = `
+                            <span style="color:${themeColor}" class="text-[9px] font-black mb-1 uppercase tracking-tighter">${d.user}</span>
+                            <p class="text-sm text-white/90 leading-relaxed">${escapeHtml(d.txt)}</p>
+                        `;
+                    }
                     box.appendChild(div);
                 });
-                box.scrollTop = box.scrollHeight;
+
+                if(isAtBottom) box.scrollTop = box.scrollHeight;
             });
         }
 
@@ -193,8 +276,14 @@
                 s.forEach(u => {
                     const name = u.val();
                     const div = document.createElement('div');
-                    div.className = "p-3 bg-white/5 rounded-xl border border-white/10 text-sm font-bold flex items-center gap-2";
-                    div.innerHTML = `<div class="w-2 h-2 rounded-full bg-green-500"></div> ${name}`;
+                    div.className = "p-4 bg-white/5 rounded-2xl border border-white/10 text-xs font-bold flex items-center justify-between";
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div> 
+                            <span class="opacity-80">${name}</span>
+                        </div>
+                        ${name === myNick ? '<span class="text-[8px] opacity-40">VOCÊ</span>' : ''}
+                    `;
                     list.appendChild(div);
                 });
             });
@@ -202,28 +291,54 @@
 
         function send() {
             const i = document.getElementById('msg-input');
-            if(!i.value.trim()) return;
-            db.ref('msgs').push({ user: myNick, txt: i.value });
+            const txt = i.value.trim();
+            if(!txt) return;
+            db.ref('msgs').push({ user: myNick, txt: txt, time: Date.now() });
             i.value = "";
         }
 
         function toggleMic() {
             isMic = !isMic;
             stream.getAudioTracks()[0].enabled = isMic;
-            db.ref('msgs').push({ sys: true, txt: `🎙️ ${myNick} ${isMic ? 'ligou' : 'mutou'} o mic.` });
-            document.getElementById('mic-btn').className = `w-14 h-14 flex items-center justify-center rounded-full btn-action border-white/20 ${isMic ? 'bg-green-600' : 'bg-red-600'}`;
+            const btn = document.getElementById('mic-btn');
+            const icon = document.getElementById('mic-icon');
+            
+            btn.className = `w-16 h-16 flex items-center justify-center rounded-full btn-action border-white/20 shadow-lg ${isMic ? 'bg-green-600' : 'bg-red-600'}`;
+            icon.innerHTML = isMic ? 
+                `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>` : 
+                `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636"></path>`;
+            
+            db.ref('msgs').push({ sys: true, txt: `🎙️ ${myNick} ${isMic ? 'LIGOU O MIC' : 'SILENCIOU'}` });
         }
 
-        function clearChat() { if(confirm("Limpar conversa?")) db.ref('msgs').remove(); }
+        function clearChat() { 
+            if(confirm("Deseja apagar o histórico para todos?")) {
+                db.ref('msgs').remove();
+            }
+        }
         
         function hangUp() {
-            db.ref('msgs').push({ sys: true, txt: `🚪 ${myNick} saiu.` }).then(() => {
-                db.ref('call').remove();
+            db.ref('msgs').push({ sys: true, txt: `🚪 ${myNick} DESCONECTOU` }).then(() => {
+                // Limpeza WebRTC
+                if(pc) pc.close();
+                if(stream) stream.getTracks().forEach(t => t.stop());
                 location.reload();
             });
         }
 
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event Listeners
         document.getElementById('msg-input').addEventListener('keypress', e => e.key === 'Enter' && send());
+        
+        // Bloqueia zoom duplo no mobile
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) e.preventDefault();
+        }, { passive: false });
     </script>
 </body>
 </html>
