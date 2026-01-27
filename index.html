@@ -14,62 +14,69 @@
         .btn-action { transition: all 0.2s; border-width: 2px; }
         .btn-action:active { transform: scale(0.9); }
         .dynamic-border { border-width: 2px; border-style: solid; transition: border-color 0.3s ease; }
-        #config-modal { display: none; }
+        .modal { display: none; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
 <body class="h-screen flex flex-col items-center justify-center p-4">
 
-    <button id="btn-config" onclick="toggleModal(true)" class="fixed top-4 right-4 text-xl z-50 p-3 glass rounded-full dynamic-border border-white/10">⚙️</button>
+    <button id="btn-config" onclick="toggleM('config-modal', true)" class="fixed top-4 right-4 text-xl z-50 p-3 glass rounded-full dynamic-border border-white/10">⚙️</button>
 
     <div id="lobby-elements" class="text-center w-full max-w-md">
-        <h1 class="text-3xl font-black bg-gradient-custom bg-clip-text text-transparent italic mb-8 tracking-tighter">CALL BASE</h1>
-        
+        <h1 class="text-3xl font-black bg-gradient-custom bg-clip-text text-transparent italic mb-8 tracking-tighter uppercase">Call Base</h1>
         <div id="login-screen" class="glass p-8 rounded-[2rem] shadow-2xl dynamic-border">
-            <input type="text" id="username" placeholder="Seu nome" class="w-full p-4 rounded-2xl bg-white/5 border-2 border-white/10 mb-6 focus:outline-none focus:border-white/30 transition text-center text-lg">
-            <button onclick="connect()" class="w-full py-4 rounded-2xl bg-gradient-custom font-black text-xl hover:opacity-90 btn-action border-white/20">ENTRAR AGORA</button>
+            <input type="text" id="username" placeholder="Seu nome" class="w-full p-4 rounded-2xl bg-white/5 border-2 border-white/10 mb-6 focus:outline-none focus:border-white/30 transition text-center text-lg text-white">
+            <button onclick="connect()" class="w-full py-4 rounded-2xl bg-gradient-custom font-black text-xl hover:opacity-90 btn-action border-white/20">ENTRAR NA SALA</button>
         </div>
-
-        <footer class="mt-8 text-gray-500 text-xs">
-            Made By: <a href="https://instagram.com/085_Teuzinnn" target="_blank" class="text-blue-500 font-bold">@085_Teuzinnn</a>
-        </footer>
+        <footer class="mt-8 text-gray-500 text-xs italic">Made By: @085_Teuzinnn</footer>
     </div>
 
     <div id="call-screen" class="hidden w-full max-w-md h-[85vh] flex flex-col glass rounded-[2.5rem] overflow-hidden shadow-2xl dynamic-border">
         <div class="p-5 border-b-2 border-white/5 flex justify-between items-center bg-white/5">
-            <button onclick="clearChat()" class="text-xl hover:rotate-12 transition">🧹</button>
-            <span id="user-display" class="text-xs font-black tracking-widest uppercase opacity-70"></span>
-            <div class="w-6"></div>
+            <div class="flex gap-4">
+                <button onclick="toggleM('users-modal', true)" class="text-xl hover:scale-110 transition">👥️</button>
+                <button onclick="clearChat()" class="text-xl hover:scale-110 transition">🧹</button>
+            </div>
+            <span id="user-display" class="text-[10px] font-black tracking-widest uppercase opacity-60"></span>
+            <div class="w-10"></div>
         </div>
-        
-        <div id="chat-box" class="flex-1 p-5 overflow-y-auto space-y-4 flex flex-col scroll-smooth"></div>
-
+        <div id="chat-box" class="flex-1 p-5 overflow-y-auto space-y-4 flex flex-col"></div>
         <div class="p-6 space-y-5 bg-black/20 border-t-2 border-white/5">
             <div class="flex gap-3">
-                <input type="text" id="msg-input" placeholder="Enviar SMS..." class="flex-1 p-4 rounded-2xl bg-white/5 border-2 border-white/10 focus:outline-none text-sm">
-                <button onclick="sendMsg()" class="px-6 py-2 bg-white/10 rounded-2xl font-bold btn-action border-white/10">SMS</button>
+                <input type="text" id="msg-input" placeholder="SMS rápido..." class="flex-1 p-4 rounded-2xl bg-white/5 border-2 border-white/10 focus:outline-none text-sm text-white">
+                <button onclick="sendMsg()" class="px-5 py-2 bg-white/10 rounded-2xl font-bold btn-action border-white/10">SMS</button>
             </div>
-            <div class="flex justify-center items-center gap-10 pb-2">
-                <button id="mic-btn" onclick="toggleMic()" class="w-16 h-16 flex items-center justify-center rounded-full bg-green-600 btn-action border-white/20">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+            <div class="flex justify-center items-center gap-10">
+                <button id="mic-btn" onclick="toggleMic()" class="w-14 h-14 flex items-center justify-center rounded-full bg-green-600 btn-action border-white/20">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
                 </button>
-                <button onclick="hangUp()" class="w-16 h-16 flex items-center justify-center rounded-full bg-red-600 btn-action border-white/20">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.209.435l-1.13 1.883a15.047 15.047 0 01-8.284-8.284l1.883-1.13a1 1 0 00.435-1.209L7.228 3.684A1 1 0 006.28 3H5z"></path></svg>
+                <button onclick="hangUp()" class="w-14 h-14 flex items-center justify-center rounded-full bg-red-600 btn-action border-white/20">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.209.435l-1.13 1.883a15.047 15.047 0 01-8.284-8.284l1.883-1.13a1 1 0 00.435-1.209L7.228 3.684A1 1 0 006.28 3H5z"></path></svg>
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="config-modal" class="fixed inset-0 bg-black/95 flex items-center justify-center z-[100] p-6">
-        <div class="glass p-8 rounded-[2.5rem] w-full max-w-xs text-center dynamic-border">
-            <h2 class="text-2xl font-black mb-8 italic">CONFIGS</h2>
-            <div class="grid grid-cols-2 gap-4 mb-8">
-                <button onclick="changeBorder('#ff8c00')" class="p-5 rounded-2xl bg-[#ff8c00] border-2 border-white/20"></button>
-                <button onclick="changeBorder('#22c55e')" class="p-5 rounded-2xl bg-[#22c55e] border-2 border-white/20"></button>
-                <button onclick="changeBorder('#ec4899')" class="p-5 rounded-2xl bg-[#ec4899] border-2 border-white/20"></button>
-                <button onclick="changeBorder('#a855f7')" class="p-5 rounded-2xl bg-[#a855f7] border-2 border-white/20"></button>
+    <div id="config-modal" class="modal fixed inset-0 bg-black/95 flex items-center justify-center z-[100] p-6">
+        <div class="glass p-8 rounded-[2.5rem] w-full max-w-xs text-center dynamic-border border-white/10">
+            <h2 class="text-xl font-black mb-6 italic uppercase">Ajustes</h2>
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button onclick="changeB('#ff8c00')" class="p-5 rounded-2xl bg-[#ff8c00] border-2 border-white/20"></button>
+                <button onclick="changeB('#22c55e')" class="p-5 rounded-2xl bg-[#22c55e] border-2 border-white/20"></button>
+                <button onclick="changeB('#ec4899')" class="p-5 rounded-2xl bg-[#ec4899] border-2 border-white/20"></button>
+                <button onclick="changeB('#a855f7')" class="p-5 rounded-2xl bg-[#a855f7] border-2 border-white/20"></button>
             </div>
-            <button onclick="clearName()" class="w-full py-4 mb-4 rounded-2xl bg-white/5 font-bold border-2 border-white/10">LIMPAR NOME</button>
-            <button onclick="toggleModal(false)" class="w-full py-4 rounded-2xl bg-white text-black font-black">VOLTAR</button>
+            <button onclick="clearN()" class="w-full py-3 mb-3 rounded-xl bg-white/5 font-bold border-2 border-white/10">LIMPAR NOME</button>
+            <button onclick="toggleM('config-modal', false)" class="w-full py-3 rounded-xl bg-white text-black font-black">FECHAR</button>
+        </div>
+    </div>
+
+    <div id="users-modal" class="modal fixed inset-0 bg-black/90 flex items-center justify-center z-[100] p-6">
+        <div class="glass p-6 rounded-[2rem] w-full max-w-xs dynamic-border border-white/10">
+            <h2 class="text-center font-black mb-4 uppercase text-sm tracking-widest">Na Sala 👥️</h2>
+            <div id="users-list" class="space-y-2 mb-6 max-h-60 overflow-y-auto"></div>
+            <button onclick="toggleM('users-modal', false)" class="w-full py-3 rounded-xl bg-white/10 font-bold border-2 border-white/10">VOLTAR</button>
         </div>
     </div>
 
@@ -86,119 +93,158 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        let localStream, myName = "", isMicOn = true, pcs = {};
+        let localStream, myName = "", isMicOn = true, pcs = {}, myId = "";
 
-        const savedName = localStorage.getItem('callbase_name');
-        if(savedName) document.getElementById('username').value = savedName;
-        const savedColor = localStorage.getItem('callbase_color') || '#ff8c00';
-        applyBorderColor(savedColor);
+        const savedN = localStorage.getItem('cb_n');
+        if(savedN) document.getElementById('username').value = savedN;
+        applyB(localStorage.getItem('cb_c') || '#ff8c00');
 
-        function toggleModal(s) { document.getElementById('config-modal').style.display = s ? 'flex' : 'none'; }
-        function changeBorder(c) { localStorage.setItem('callbase_color', c); applyBorderColor(c); }
-        function applyBorderColor(c) { document.querySelectorAll('.dynamic-border').forEach(e => e.style.borderColor = c); }
-        function clearName() { localStorage.removeItem('callbase_name'); document.getElementById('username').value = ""; }
+        function toggleM(id, s) { document.getElementById(id).style.display = s ? 'flex' : 'none'; }
+        function changeB(c) { localStorage.setItem('cb_c', c); applyB(c); }
+        function applyB(c) { document.querySelectorAll('.dynamic-border').forEach(e => e.style.borderColor = c); }
+        function clearN() { localStorage.removeItem('cb_n'); document.getElementById('username').value = ""; }
 
         async function connect() {
             const nick = document.getElementById('username').value.trim();
             if (!nick) return;
             const snap = await db.ref('users').once('value');
-            if (Object.values(snap.val() || {}).includes(nick)) return alert("Nome já existe!");
+            if (Object.values(snap.val() || {}).some(u => u.name === nick)) return alert("Nome em uso!");
             
             myName = nick;
-            localStorage.setItem('callbase_name', myName);
-            const myRef = db.ref('users').push(myName);
+            localStorage.setItem('cb_n', myName);
+            const myRef = db.ref('users').push();
+            myId = myRef.key;
+            myRef.set({ name: myName, id: myId });
             myRef.onDisconnect().remove();
 
             document.getElementById('lobby-elements').classList.add('hidden');
             document.getElementById('btn-config').classList.add('hidden');
             document.getElementById('call-screen').classList.remove('hidden');
-            document.getElementById('user-display').innerText = myName;
+            document.getElementById('user-display').innerText = `@${myName}`;
 
-            startP2P();
+            initCall();
             setupChat();
+            setupUsersList();
         }
 
-        async function startP2P() {
+        async function initCall() {
             localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            db.ref('messages').push({ system: true, text: `${myName} entrou na call.` });
+            db.ref('messages').push({ sys: true, txt: `▶️ ${myName} entrou na sala.` });
 
             db.ref('users').on('child_added', (s) => {
                 const user = s.val();
-                if (user !== myName) makeCall(user);
+                if (user.id !== myId) {
+                    createPeer(user.id, user.name, true);
+                }
             });
 
-            db.ref(`calls/${myName}`).on('child_added', async (s) => {
-                const { from, type, signal } = s.val();
-                if (!pcs[from]) initPeer(from, false);
-                if (type === 'offer') {
-                    await pcs[from].setRemoteDescription(new RTCSessionDescription(signal));
-                    const ans = await pcs[from].createAnswer();
-                    await pcs[from].setLocalDescription(ans);
-                    db.ref(`calls/${from}`).push({ from: myName, type: 'answer', signal: ans });
-                } else if (type === 'answer') {
-                    await pcs[from].setRemoteDescription(new RTCSessionDescription(signal));
-                } else if (type === 'ice') {
-                    pcs[from].addIceCandidate(new RTCIceCandidate(signal));
+            db.ref('users').on('child_removed', (s) => {
+                const user = s.val();
+                if (pcs[user.id]) {
+                    pcs[user.id].close();
+                    delete pcs[user.id];
                 }
+                db.ref('messages').push({ sys: true, txt: `❌ ${user.name} desconectou.` });
+            });
+
+            db.ref(`signal/${myId}`).on('child_added', async (s) => {
+                const { fromId, fromName, type, data } = s.val();
+                if (!pcs[fromId]) createPeer(fromId, fromName, false);
+                
+                if (type === 'offer') {
+                    await pcs[fromId].setRemoteDescription(new RTCSessionDescription(data));
+                    const ans = await pcs[fromId].createAnswer();
+                    await pcs[fromId].setLocalDescription(ans);
+                    sendSig(fromId, 'answer', ans);
+                } else if (type === 'answer') {
+                    await pcs[fromId].setRemoteDescription(new RTCSessionDescription(data));
+                } else if (type === 'ice') {
+                    pcs[fromId].addIceCandidate(new RTCIceCandidate(data));
+                }
+                s.ref.remove();
             });
         }
 
-        function initPeer(target, isOfferer) {
+        function createPeer(tId, tName, isOfferer) {
             const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
-            pcs[target] = pc;
+            pcs[tId] = pc;
             localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+
             pc.ontrack = (e) => {
                 const audio = new Audio();
                 audio.srcObject = e.streams[0];
                 audio.autoplay = true;
             };
+
             pc.onicecandidate = (e) => {
-                if (e.candidate) db.ref(`calls/${target}`).push({ from: myName, type: 'ice', signal: e.candidate });
+                if (e.candidate) sendSig(tId, 'ice', e.candidate);
             };
-            return pc;
+
+            if (isOfferer) {
+                pc.onnegotiationneeded = async () => {
+                    const offer = await pc.createOffer();
+                    await pc.setLocalDescription(offer);
+                    sendSig(tId, 'offer', offer);
+                };
+            }
         }
 
-        async function makeCall(target) {
-            const pc = initPeer(target, true);
-            const offer = await pc.createOffer();
-            await pc.setLocalDescription(offer);
-            db.ref(`calls/${target}`).push({ from: myName, type: 'offer', signal: offer });
+        function sendSig(toId, type, data) {
+            db.ref(`signal/${toId}`).push({ fromId: myId, fromName: myName, type, data });
         }
 
         function setupChat() {
             db.ref('messages').on('value', (s) => {
                 const box = document.getElementById('chat-box');
                 box.innerHTML = "";
-                const theme = localStorage.getItem('callbase_color') || '#ff8c00';
+                const theme = localStorage.getItem('cb_c') || '#ff8c00';
                 s.forEach(c => {
                     const d = c.val();
                     const div = document.createElement('div');
-                    div.className = d.system ? "text-center text-gray-600 text-[10px] uppercase font-bold" : "bg-white/5 p-4 rounded-2xl border border-white/5 self-start max-w-[85%]";
-                    div.innerHTML = d.system ? d.text : `<span style="color:${theme}" class="text-[10px] font-black block mb-1 uppercase">${d.user}</span><p class="text-sm opacity-90">${d.text}</p>`;
+                    div.className = d.sys ? "text-center text-gray-600 text-[9px] font-black uppercase my-1" : "bg-white/5 p-4 rounded-2xl border border-white/5 self-start max-w-[85%]";
+                    div.innerHTML = d.sys ? d.txt : `<span style="color:${theme}" class="text-[10px] font-black block mb-1 uppercase">${d.user}</span><p class="text-sm opacity-90">${d.txt}</p>`;
                     box.appendChild(div);
                 });
                 box.scrollTop = box.scrollHeight;
             });
         }
 
+        function setupUsersList() {
+            db.ref('users').on('value', (s) => {
+                const list = document.getElementById('users-list');
+                list.innerHTML = "";
+                s.forEach(u => {
+                    const user = u.val();
+                    const item = document.createElement('div');
+                    item.className = "flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10";
+                    item.innerHTML = `<div class="w-2 h-2 rounded-full bg-green-500"></div><span class="text-sm font-bold">${user.name} ${user.id === myId ? '(Você)' : ''}</span>`;
+                    list.appendChild(item);
+                });
+            });
+        }
+
         function sendMsg() {
             const i = document.getElementById('msg-input');
             if (!i.value.trim()) return;
-            db.ref('messages').push({ user: myName, text: i.value });
+            db.ref('messages').push({ user: myName, txt: i.value });
             i.value = "";
         }
 
-        function clearChat() { if(confirm("Limpar para todos?")) db.ref('messages').remove(); }
+        function clearChat() { if(confirm("Limpar conversa?")) db.ref('messages').remove(); }
 
         function toggleMic() {
             isMicOn = !isMicOn;
             localStream.getAudioTracks()[0].enabled = isMicOn;
-            const b = document.getElementById('mic-btn');
-            b.classList.toggle('bg-green-600', isMicOn);
-            b.classList.toggle('bg-red-600', !isMicOn);
+            db.ref('messages').push({ sys: true, txt: `🎙️ ${myName} ${isMicOn ? 'ligou' : 'desligou'} o mic.` });
+            const btn = document.getElementById('mic-btn');
+            btn.classList.toggle('bg-green-600', isMicOn);
+            btn.classList.toggle('bg-red-600', !isMicOn);
         }
 
-        function hangUp() { location.reload(); }
+        function hangUp() { 
+            db.ref('messages').push({ sys: true, txt: `🚪 ${myName} saiu da ligação.` }).then(() => location.reload());
+        }
+
         document.getElementById('msg-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMsg(); });
     </script>
 </body>
