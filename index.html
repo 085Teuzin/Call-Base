@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call Base - Made By: @085_Teuzinnn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <style>
+        body { background-color: #0a0a0a; color: white; overflow: hidden; }
+        .bg-gradient-custom { background: linear-gradient(135deg, #ff8c00, #22c55e, #ec4899, #a855f7); }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-action { transition: all 0.2s; }
+        .btn-action:active { transform: scale(0.95); }
+    </style>
+</head>
+<body class="h-screen flex flex-col items-center justify-center p-4">
+
+    <div id="login-screen" class="w-full max-w-md glass p-8 rounded-3xl shadow-2xl text-center">
+        <h1 class="text-xl font-bold mb-6 bg-gradient-custom bg-clip-text text-transparent italic">Call Base</h1>
+        <input type="text" id="username" placeholder="Seu nome" class="w-full p-4 rounded-2xl bg-white/10 border border-white/20 mb-4 focus:outline-none focus:border-purple-500 transition">
+        <button onclick="connect()" class="w-full py-4 rounded-2xl bg-gradient-custom font-bold text-lg hover:opacity-90 btn-action">Conectar</button>
+    </div>
+
+    <div id="call-screen" class="hidden w-full max-w-md h-[80vh] flex flex-col glass rounded-3xl overflow-hidden shadow-2xl">
+        <div class="p-4 border-b border-white/10 flex justify-between items-center bg-white/5">
+            <h1 class="text-sm font-bold italic">Call Base</h1>
+            <span id="user-display" class="text-xs text-gray-400"></span>
+        </div>
+
+        <div id="chat-box" class="flex-1 p-4 overflow-y-auto space-y-2 text-sm"></div>
+
+        <div class="p-4 space-y-4 bg-white/5">
+            <div class="flex gap-2">
+                <input type="text" id="msg-input" placeholder="Mensagem rápida..." class="flex-1 p-3 rounded-xl bg-white/10 border border-white/10 focus:outline-none text-sm">
+                <button onclick="sendMsg()" class="px-4 py-2 bg-purple-600 rounded-xl font-bold btn-action">Chat</button>
+            </div>
+            
+            <div class="flex justify-around items-center pb-2">
+                <button id="mic-btn" onclick="toggleMic()" class="p-4 rounded-full bg-gray-700 hover:bg-gray-600 btn-action">
+                    <svg id="mic-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                </button>
+                <button onclick="hangUp()" class="p-4 rounded-full bg-red-600 hover:bg-red-700 btn-action">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.209.435l-1.13 1.883a15.047 15.047 0 01-8.284-8.284l1.883-1.13a1 1 0 00.435-1.209L7.228 3.684A1 1 0 006.28 3H5z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center mt-5 text-gray-500 text-sm">
+        Made By: <a href="https://instagram.com/085_Teuzinnn" target="_blank" class="text-blue-400 hover:text-blue-300 font-semibold transition duration-200">@085_Teuzinnn</a>
+    </footer>
+
+    <audio id="remote-audio" autoplay></audio>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBq9-vsFpAgEtXJ--KH6knNKEpXXVgkGrc",
+            authDomain: "conexao-geral-teuzin.firebaseapp.com",
+            databaseURL: "https://conexao-geral-teuzin-default-rtdb.firebaseio.com",
+            projectId: "conexao-geral-teuzin",
+            storageBucket: "conexao-geral-teuzin.firebasestorage.app",
+            messagingSenderId: "153059359862",
+            appId: "1:153059359862:web:c9e69bbb151748cd8d7357"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        let localStream;
+        let myName = "";
+        let isMicOn = true;
+
+        async function connect() {
+            const input = document.getElementById('username');
+            myName = input.value.trim();
+            if (!myName) return alert("Digite um nome!");
+
+            const snapshot = await db.ref('users').once('value');
+            const users = snapshot.val() || {};
+            if (Object.values(users).includes(myName)) return alert("Nome já em uso!");
+
+            const userRef = db.ref('users').push();
+            userRef.set(myName);
+            userRef.onDisconnect().remove();
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('call-screen').classList.remove('hidden');
+            document.getElementById('user-display').innerText = `Logado como: ${myName}`;
+
+            startCall();
+            setupChat();
+        }
+
+        async function startCall() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const msg = { system: true, text: `${myName} entrou na chamada.` };
+                db.ref('messages').push(msg);
+            } catch (e) {
+                alert("Erro ao acessar microfone.");
+            }
+        }
+
+        function setupChat() {
+            db.ref('messages').limitToLast(20).on('child_added', (snap) => {
+                const data = snap.val();
+                const div = document.createElement('div');
+                div.className = data.system ? "text-center text-gray-500 italic text-xs" : "bg-white/10 p-2 rounded-lg w-fit max-w-[80%]";
+                div.innerHTML = data.system ? data.text : `<strong>${data.user}:</strong> ${data.text}`;
+                const box = document.getElementById('chat-box');
+                box.appendChild(div);
+                box.scrollTop = box.scrollHeight;
+            });
+        }
+
+        function sendMsg() {
+            const input = document.getElementById('msg-input');
+            if (!input.value.trim()) return;
+            db.ref('messages').push({ user: myName, text: input.value });
+            input.value = "";
+        }
+
+        function toggleMic() {
+            isMicOn = !isMicOn;
+            localStream.getAudioTracks()[0].enabled = isMicOn;
+            document.getElementById('mic-btn').classList.toggle('bg-red-500', !isMicOn);
+            document.getElementById('mic-btn').classList.toggle('bg-gray-700', isMicOn);
+        }
+
+        function hangUp() {
+            location.reload();
+        }
+
+        document.getElementById('msg-input').addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') sendMsg();
+        });
+    </script>
+</body>
+</html>
