@@ -3,44 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Call Base Pro</title>
+    <title>Call Base - Made By: @085_Teuzinnn</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --theme: #ff4d00; --bg: #050505; --card: #121212; --text: #ffffff; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s ease; }
-        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .app-container { width: 95%; max-width: 450px; background: var(--card); padding: 40px 25px; border-radius: 40px; border: 1px solid rgba(255,255,255,0.1); text-align: center; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .glow { position: absolute; top: -50px; left: -50px; width: 100px; height: 100px; background: var(--theme); filter: blur(80px); opacity: 0.3; z-index: -1; }
-        h1 { font-weight: 800; letter-spacing: -1px; margin-bottom: 5px; background: linear-gradient(to bottom, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .version-info { font-size: 0.7rem; color: #444; margin-bottom: 25px; display: block; }
-        .id-card { background: rgba(255,255,255,0.03); padding: 20px; border-radius: 20px; margin: 20px 0; border: 1px solid rgba(255,77,0,0.3); cursor: pointer; }
-        .id-card:active { transform: scale(0.98); background: rgba(255,77,0,0.1); }
-        input { width: 100%; padding: 16px; border-radius: 15px; border: 1px solid #222; background: #000; color: #fff; text-align: center; margin-bottom: 12px; font-size: 1rem; }
-        input:focus { border-color: var(--theme); outline: none; box-shadow: 0 0 15px rgba(255,77,0,0.2); }
-        .btn-orange { background: var(--theme); color: #fff; border: none; padding: 18px; border-radius: 15px; font-weight: 700; cursor: pointer; width: 100%; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-orange:hover { filter: brightness(1.2); transform: translateY(-2px); }
-        .top-bar { position: absolute; top: 20px; left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 25px; }
-        .icon-btn { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #1a1a1a; border: 1px solid #333; cursor: pointer; font-size: 1.2rem; }
-        .call-ui { display: none; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .avatar-circle { width: 120px; height: 120px; background: #1a1a1a; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; border: 3px solid var(--theme); position: relative; }
+        :root { --theme: #ff4d00; --bg: #050505; --card: #121212; --text: #ffffff; --border: rgba(255,255,255,0.15); }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.2s ease; overflow: hidden; }
+        body { background: var(--bg); color: var(--text); height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center; position: fixed; }
+        .app-container { width: 90%; max-width: 400px; height: 85vh; background: var(--card); padding: 30px 20px; border-radius: 35px; border: 2px solid var(--theme); text-align: center; position: relative; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        .glow { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, var(--theme) 0%, transparent 70%); opacity: 0.1; z-index: -1; }
+        h1 { font-weight: 800; font-size: 1.8rem; margin-bottom: 5px; color: var(--text); }
+        .version-info { font-size: 0.6rem; color: var(--theme); font-weight: bold; margin-bottom: 20px; display: block; letter-spacing: 2px; }
+        .id-card { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; margin: 15px 0; border: 2px solid var(--theme); cursor: pointer; }
+        input { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid var(--theme); background: #000; color: #fff; text-align: center; margin-bottom: 10px; font-size: 0.9rem; }
+        .btn-orange { background: var(--theme); color: #fff; border: 2px solid var(--text); padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; font-size: 0.9rem; text-transform: uppercase; }
+        .top-bar { position: absolute; top: 20px; left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 20px; z-index: 10; }
+        .icon-btn { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: #1a1a1a; border: 2px solid var(--theme); cursor: pointer; }
+        .call-ui { display: none; height: 100%; flex-direction: column; justify-content: center; }
+        .avatar-circle { width: 100px; height: 100px; background: #1a1a1a; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 3rem; border: 4px solid var(--theme); position: relative; }
         .pulse { position: absolute; width: 100%; height: 100%; border: 2px solid var(--theme); border-radius: 50%; animation: ripple 1.5s infinite; }
-        @keyframes ripple { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
-        .controls { display: flex; justify-content: center; gap: 15px; margin-top: 35px; }
-        .c-btn { width: 65px; height: 65px; border-radius: 20px; border: none; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .c-mic { background: #222; color: #fff; }
-        .c-mic.off { background: #ff4d00; box-shadow: 0 0 20px rgba(255,77,0,0.4); }
-        .c-chat { background: #222; color: #fff; }
-        .c-end { background: #ff3b30; color: #fff; transform: rotate(135deg); }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; padding: 30px; flex-direction: column; backdrop-filter: blur(10px); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .chat-box { flex: 1; overflow-y: auto; background: rgba(255,255,255,0.03); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #222; }
-        .msg { margin-bottom: 12px; padding: 10px 15px; border-radius: 12px; max-width: 85%; width: fit-content; font-size: 0.9rem; }
-        .msg-self { background: var(--theme); margin-left: auto; border-bottom-right-radius: 2px; }
-        .msg-remote { background: #222; margin-right: auto; border-bottom-left-radius: 2px; }
-        .msg-time { display: block; font-size: 0.6rem; opacity: 0.7; margin-top: 4px; }
-        .toast { position: fixed; bottom: 30px; background: var(--theme); color: #fff; padding: 12px 25px; border-radius: 50px; font-weight: 600; display: none; z-index: 2000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        @keyframes ripple { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
+        .controls { display: flex; justify-content: center; gap: 12px; margin-top: 25px; }
+        .c-btn { width: 55px; height: 55px; border-radius: 15px; border: 2px solid #fff; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .c-mic { background: #222; }
+        .c-mic.off { background: var(--theme); }
+        .c-end { background: #ff3b30; transform: rotate(135deg); }
+        .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #151515; border: 2px solid var(--theme); border-radius: 25px; padding: 20px; z-index: 2000; width: 85%; flex-direction: column; box-shadow: 0 0 50px #000; }
+        #modal-settings { width: 280px; padding: 25px; }
+        .chat-box { height: 200px; overflow-y: auto; background: #000; border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 2px solid var(--theme); }
+        .msg { margin-bottom: 8px; padding: 8px 12px; border-radius: 10px; max-width: 90%; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.1); }
+        .msg-self { background: var(--theme); margin-left: auto; }
+        .msg-remote { background: #222; margin-right: auto; }
+        .toast { position: fixed; bottom: 20px; background: var(--theme); color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 600; display: none; z-index: 3000; border: 2px solid #fff; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -51,63 +45,53 @@
     <div class="app-container">
         <div class="top-bar">
             <button class="icon-btn" onclick="toggleSettings(true)">⚙️</button>
-            <button class="icon-btn" style="background:#25d366" onclick="shareLink()">🔗</button>
+            <button class="icon-btn" style="border-color:#25d366" onclick="shareLink()">🔗</button>
         </div>
 
-        <h1 id="main-title">Call Base</h1>
-        <span class="version-info">PRO EDITION V2.0</span>
-
         <div id="lobby">
-            <input type="text" id="nick-input" placeholder="Seu Nome/Apelido">
+            <h1>Call Base</h1>
+            <span class="version-info">PRO EDITION</span>
+            <input type="text" id="nick-input" placeholder="Seu Nome">
             <div class="id-card" onclick="copyInviteLink()">
-                <p style="font-size: 0.7rem; color: #666; text-transform: uppercase; margin-bottom: 5px;">Seu ID de Conexão</p>
-                <strong id="my-id" style="font-size: 1.2rem; letter-spacing: 2px;">...</strong>
+                <p style="font-size: 0.6rem; opacity: 0.6; margin-bottom: 5px;">MEU ID (TOQUE PARA COPIAR)</p>
+                <strong id="my-id">...</strong>
             </div>
             <input type="text" id="peer-id-input" placeholder="ID do Destinatário">
-            <button class="btn-orange" onclick="startCall()">Iniciar Chamada 📞</button>
+            <button class="btn-orange" onclick="startCall()">Conectar Agora 📞</button>
         </div>
 
         <div id="call-screen" class="call-ui">
-            <div class="avatar-circle">
-                <div class="pulse"></div>
-                👤
-            </div>
-            <h2 id="remote-nick-display">Conectando...</h2>
-            <p id="timer" style="color: var(--theme); font-family: monospace; font-weight: bold; margin-top: 10px;">00:00</p>
-            
+            <div class="avatar-circle"><div class="pulse"></div>👤</div>
+            <h2 id="remote-nick-display" style="font-size:1.2rem">Conectando...</h2>
+            <p id="timer" style="color: var(--theme); font-family: monospace; font-weight: bold; margin-top: 5px;">00:00</p>
             <div class="controls">
                 <button class="c-btn c-mic" id="mic-btn" onclick="toggleMic()">🎙️</button>
-                <button class="c-btn c-chat" onclick="toggleChat(true)">💬</button>
+                <button class="c-btn" style="background:#222; border-color:var(--theme)" onclick="toggleChat(true)">💬</button>
                 <button class="c-btn c-end" onclick="endCall()">📞</button>
             </div>
         </div>
     </div>
 
     <div id="modal-settings" class="modal">
-        <div class="modal-header">
-            <h2>Ajustes</h2>
-            <button class="icon-btn" onclick="toggleSettings(false)">✕</button>
+        <h3 style="margin-bottom:15px; font-size:1rem">Temas</h3>
+        <div style="display:flex; gap:10px; justify-content:center; margin-bottom: 20px;">
+            <div style="width:35px; height:35px; border-radius:8px; background:#ff4d00; border:2px solid #fff; cursor:pointer;" onclick="setTheme('#ff4d00')"></div>
+            <div style="width:35px; height:35px; border-radius:8px; background:#007aff; border:2px solid #fff; cursor:pointer;" onclick="setTheme('#007aff')"></div>
+            <div style="width:35px; height:35px; border-radius:8px; background:#a333ff; border:2px solid #fff; cursor:pointer;" onclick="setTheme('#a333ff')"></div>
+            <div style="width:35px; height:35px; border-radius:8px; background:#2ecc71; border:2px solid #fff; cursor:pointer;" onclick="setTheme('#2ecc71')"></div>
         </div>
-        <p style="margin-bottom: 10px;">Cor Principal:</p>
-        <div style="display:flex; gap:15px; justify-content:center; margin-bottom: 30px;">
-            <div style="width:45px; height:45px; border-radius:12px; background:#ff4d00; cursor:pointer;" onclick="setTheme('#ff4d00')"></div>
-            <div style="width:45px; height:45px; border-radius:12px; background:#007aff; cursor:pointer;" onclick="setTheme('#007aff')"></div>
-            <div style="width:45px; height:45px; border-radius:12px; background:#a333ff; cursor:pointer;" onclick="setTheme('#a333ff')"></div>
-            <div style="width:45px; height:45px; border-radius:12px; background:#2ecc71; cursor:pointer;" onclick="setTheme('#2ecc71')"></div>
-        </div>
-        <button class="btn-orange" style="background:#222" onclick="fullScreen()">Tela Cheia</button>
-        <button class="btn-orange" style="background:#ff3b30; margin-top: 10px;" onclick="clearData()">Redefinir App</button>
+        <button class="btn-orange" style="font-size:0.7rem; padding:10px" onclick="toggleSettings(false)">Fechar</button>
     </div>
 
     <div id="modal-chat" class="modal">
-        <div class="modal-header">
-            <h3>Chat da Call</h3>
-            <button class="icon-btn" onclick="toggleChat(false)">✕</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+            <h3 style="font-size:0.9rem">Chat</h3>
+            <button onclick="toggleChat(false)" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer">✕</button>
         </div>
         <div id="chat-content" class="chat-box"></div>
-        <div style="display: flex; gap: 10px;">
-            <input type="text" id="chat-input" placeholder="Escreva aqui..." style="margin-bottom:0">
-            <button class="btn-orange" style="width: 80px;" onclick="sendMessage()">🚀</button>
+        <div style="display: flex; gap: 5px;">
+            <input type="text" id="chat-input" placeholder="Texto..." style="margin-bottom:0; padding:10px; font-size:0.8rem">
+            <button class="btn-orange" style="width: 60px; padding:0" onclick="sendMessage()">🚀</button>
         </div>
     </div>
 
@@ -115,7 +99,9 @@
 
     <script>
         const peer = new Peer();
-        let localStream, currentConn, myNick = "User" + Math.floor(Math.random()*999), seconds = 0, timerInterval;
+        let localStream, currentConn, currentCall, myNick = "User" + Math.floor(Math.random()*999), seconds = 0, timerInterval;
+
+        peer.on('open', id => document.getElementById('my-id').innerText = id);
 
         window.onload = () => {
             const sn = localStorage.getItem('cb_nick');
@@ -125,10 +111,6 @@
             const urlId = new URLSearchParams(window.location.search).get('join');
             if(urlId) document.getElementById('peer-id-input').value = urlId;
         };
-
-        peer.on('open', id => {
-            document.getElementById('my-id').innerText = id;
-        });
 
         function setTheme(c) {
             document.documentElement.style.setProperty('--theme', c);
@@ -144,7 +126,7 @@
         function copyInviteLink() {
             const link = window.location.origin + window.location.pathname + "?join=" + peer.id;
             navigator.clipboard.writeText(link);
-            showToast("Link de convite copiado!");
+            showToast("Link copiado!");
         }
 
         function shareLink() {
@@ -157,23 +139,23 @@
             myNick = document.getElementById('nick-input').value || myNick;
             localStorage.setItem('cb_nick', myNick);
             const rId = document.getElementById('peer-id-input').value;
-            if(!rId) return showToast("Digite o ID do amigo");
+            if(!rId) return showToast("Digite o ID");
             
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: { echoCancellation: true, noiseSuppression: true } 
-                });
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 setupConn(peer.connect(rId));
-                handleCall(peer.call(rId, localStream));
-            } catch(e) { showToast("Erro: Ative o microfone"); }
+                const call = peer.call(rId, localStream);
+                handleCall(call);
+            } catch(e) { showToast("Erro no Microfone"); }
         }
 
         peer.on('connection', setupConn);
         peer.on('call', async call => {
-            if(confirm("Recebendo chamada. Aceitar?")) {
+            if(confirm("Atender chamada?")) {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 call.answer(localStream);
                 handleCall(call);
+                if(!currentConn) setupConn(peer.connect(call.peer));
             }
         });
 
@@ -182,7 +164,7 @@
             conn.on('open', () => {
                 conn.send({ type: 'nick', val: myNick });
                 document.getElementById('lobby').style.display = 'none';
-                document.getElementById('call-screen').style.display = 'block';
+                document.getElementById('call-screen').style.display = 'flex';
                 startTimer();
             });
             conn.on('data', d => {
@@ -193,10 +175,11 @@
         }
 
         function handleCall(call) {
+            currentCall = call;
             call.on('stream', s => {
                 const ra = document.getElementById('remote-audio');
                 ra.srcObject = s;
-                ra.play();
+                ra.play().catch(e => console.log("Play error"));
             });
         }
 
@@ -228,10 +211,8 @@
 
         function renderMsg(n, v, type) {
             const d = document.createElement('div');
-            const now = new Date();
-            const time = now.getHours() + ":" + now.getMinutes().toString().padStart(2,'0');
             d.className = `msg msg-${type}`;
-            d.innerHTML = `<strong>${n}</strong><br>${v}<span class="msg-time">${time}</span>`;
+            d.innerHTML = `<strong>${n}:</strong> ${v}`;
             const c = document.getElementById('chat-content');
             c.appendChild(d);
             c.scrollTop = c.scrollHeight;
@@ -239,24 +220,7 @@
 
         function toggleChat(s) { document.getElementById('modal-chat').style.display = s ? 'flex' : 'none'; }
         function toggleSettings(s) { document.getElementById('modal-settings').style.display = s ? 'flex' : 'none'; }
-        
-        function fullScreen() {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-            else document.exitFullscreen();
-        }
-
-        function clearData() {
-            localStorage.clear();
-            location.reload();
-        }
-
-        function endCall() {
-            location.href = window.location.origin + window.location.pathname;
-        }
-
-        window.onbeforeunload = () => {
-            if(currentConn) return "A call será encerrada. Sair?";
-        };
+        function endCall() { location.href = window.location.origin + window.location.pathname; }
     </script>
 </body>
 </html>
