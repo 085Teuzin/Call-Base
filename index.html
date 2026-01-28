@@ -2,343 +2,144 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Call Base Pro - @085_Teuzinnn</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call Base - Made By: @085_Teuzinnn</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        body { background-color: #060606; color: white; overflow: hidden; font-family: 'Inter', sans-serif; height: 100dvh; }
-        .bg-gradient-custom { background: linear-gradient(135deg, #ff8c00, #22c55e, #ec4899, #a855f7); }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        .btn-action { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); border-width: 2px; }
-        .btn-action:active { transform: scale(0.92); opacity: 0.8; }
-        .dynamic-border { border-width: 2px; border-style: solid; transition: border-color 0.4s; }
-        .modal-hidden { display: none !important; }
-        .modal-flex { display: flex !important; }
-        #chat-messages::-webkit-scrollbar { width: 4px; }
-        #chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        .msg-anim { animation: slideIn 0.3s ease-out; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: #0a0a0a; color: #fff; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
+        h1 { color: #ff4d00; margin-bottom: 10px; font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px; }
+        h2 { height: 0; margin: 0; }
+        .container { width: 90%; max-width: 500px; background: #1a1a1a; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(255, 61, 0, 0.2); text-align: center; border: 1px solid #333; }
+        .id-display { background: #252525; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #ff4d00; }
+        .id-display span { display: block; font-size: 0.8rem; color: #888; }
+        .id-display strong { font-size: 1.2rem; color: #ff8c00; word-break: break-all; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #444; background: #111; color: #fff; outline: none; transition: 0.3s; }
+        input:focus { border-color: #ff4d00; box-shadow: 0 0 8px rgba(255, 77, 0, 0.4); }
+        .controls { display: flex; gap: 10px; margin-top: 20px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
+        .btn-call { background: linear-gradient(45deg, #ff4d00, #ff0000); color: white; }
+        .btn-call:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4); }
+        .btn-hangup { background: #333; color: #fff; display: none; }
+        .btn-hangup:hover { background: #444; }
+        .video-container { margin-top: 20px; display: none; grid-template-columns: 1fr 1fr; gap: 10px; }
+        video { width: 100%; border-radius: 10px; background: #000; border: 1px solid #444; }
+        .status { margin-top: 15px; font-size: 0.9rem; color: #ff8c00; min-height: 1.2em; }
+        footer { margin-top: 30px; color: #666; font-size: 0.85rem; }
+        footer a { color: #ff4d00; text-decoration: none; font-weight: 600; transition: 0.2s; }
+        footer a:hover { color: #ff8c00; }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center p-4">
+<body>
 
-    <button id="btn-config" onclick="toggleM('config-modal', true)" class="fixed top-4 right-4 text-xl z-50 p-3 glass rounded-full dynamic-border shadow-lg">⚙️</button>
+    <div class="container">
+        <h1>Call Base</h1>
+        <h2></h2>
 
-    <div id="lobby-ui" class="text-center w-full max-w-md animate-fade-in">
-        <h1 class="text-4xl font-black bg-gradient-custom bg-clip-text text-transparent italic mb-2 uppercase tracking-tighter">Call Base</h1>
-        <p class="text-gray-500 text-[10px] tracking-[0.3em] uppercase mb-8">Secure Voice & Protocol</p>
+        <div class="id-display">
+            <span>Seu ID:</span>
+            <strong id="my-id">Carregando...</strong>
+        </div>
+
+        <input type="text" id="peer-id" placeholder="Digite o ID do amigo">
         
-        <div class="glass p-8 rounded-[2.5rem] shadow-2xl dynamic-border">
-            <input type="text" id="username" maxlength="15" placeholder="Seu apelido..." class="w-full p-4 rounded-2xl bg-white/5 border-2 border-white/10 mb-6 focus:outline-none focus:border-white/40 text-center text-lg text-white transition-all">
-            <button onclick="connect()" id="connect-btn" class="w-full py-4 rounded-2xl bg-gradient-custom font-black text-xl hover:opacity-90 btn-action border-white/20 shadow-xl">CONECTAR</button>
-        </div>
-        <footer class="mt-8 text-gray-600 text-[10px] font-medium tracking-widest">MADE BY: @085_TEUZINNN</footer>
-    </div>
+        <div class="status" id="status">Aguardando...</div>
 
-    <div id="call-ui" class="hidden w-full max-w-md h-[88vh] flex flex-col glass rounded-[2.5rem] overflow-hidden shadow-2xl dynamic-border">
-        <div class="p-5 border-b-2 border-white/5 flex justify-between items-center bg-white/5">
-            <div class="flex gap-3">
-                <button onclick="toggleM('users-modal', true)" class="p-2 glass rounded-xl text-lg hover:bg-white/10 transition">👥</button>
-                <button onclick="clearChat()" class="p-2 glass rounded-xl text-lg hover:bg-red-500/20 transition">🧹</button>
-            </div>
-            <div class="text-center">
-                <span id="user-display" class="text-[10px] font-black tracking-widest uppercase text-white/80"></span>
-                <div id="connection-status" class="text-[8px] text-green-500 font-bold uppercase mt-1">● Online</div>
-            </div>
-            <div class="w-12"></div>
+        <div class="video-container" id="video-grid">
+            <video id="local-video" autoplay muted playsinline></video>
+            <video id="remote-video" autoplay playsinline></video>
         </div>
 
-        <div id="chat-messages" class="flex-1 p-5 overflow-y-auto space-y-4 flex flex-col bg-black/10">
-            </div>
-
-        <div class="p-6 space-y-5 bg-black/40 border-t-2 border-white/5 backdrop-blur-md">
-            <div class="flex gap-3">
-                <input type="text" id="msg-input" autocomplete="off" placeholder="Escreva uma mensagem..." class="flex-1 p-4 rounded-2xl bg-white/5 border-2 border-white/10 focus:outline-none focus:border-white/30 text-sm text-white">
-                <button onclick="send()" class="px-6 py-2 bg-white/10 rounded-2xl font-bold btn-action border-white/10 hover:bg-white/20">SMS</button>
-            </div>
-            
-            <div class="flex justify-center items-center gap-12">
-                <button id="mic-btn" onclick="toggleMic()" class="w-16 h-16 flex items-center justify-center rounded-full bg-green-600 btn-action border-white/20 shadow-lg shadow-green-900/20">
-                    <svg id="mic-icon" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
-                </button>
-                <button onclick="hangUp()" class="w-16 h-16 flex items-center justify-center rounded-full bg-red-600 btn-action border-white/20 shadow-lg shadow-red-900/20 text-2xl">
-                    📞
-                </button>
-            </div>
+        <div class="controls">
+            <button class="btn-call" id="call-btn">Iniciar Chamada</button>
+            <button class="btn-hangup" id="hangup-btn">Desligar</button>
         </div>
     </div>
 
-    <div id="config-modal" class="modal-hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[100] p-6 backdrop-blur-sm">
-        <div class="glass p-8 rounded-[2.5rem] w-full max-w-xs text-center dynamic-border shadow-2xl">
-            <h2 class="text-xl font-black mb-6 italic uppercase tracking-widest text-white/90">Ajustes de Interface</h2>
-            <div class="grid grid-cols-2 gap-4 mb-8">
-                <button onclick="setTheme('#ff8c00')" class="h-12 rounded-2xl bg-[#ff8c00] border-2 border-white/20 hover:scale-105 transition"></button>
-                <button onclick="setTheme('#22c55e')" class="h-12 rounded-2xl bg-[#22c55e] border-2 border-white/20 hover:scale-105 transition"></button>
-                <button onclick="setTheme('#ec4899')" class="h-12 rounded-2xl bg-[#ec4899] border-2 border-white/20 hover:scale-105 transition"></button>
-                <button onclick="setTheme('#a855f7')" class="h-12 rounded-2xl bg-[#a855f7] border-2 border-white/20 hover:scale-105 transition"></button>
-            </div>
-            <button onclick="clearN()" class="w-full py-4 mb-4 rounded-2xl bg-white/5 font-bold border-2 border-white/10 hover:bg-white/10 transition text-red-400">LIMPAR PERFIL</button>
-            <button onclick="toggleM('config-modal', false)" class="w-full py-4 rounded-2xl bg-white text-black font-black uppercase text-xs tracking-widest">SALVAR</button>
-        </div>
-    </div>
-
-    <div id="users-modal" class="modal-hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[100] p-6">
-        <div class="glass p-7 rounded-[2.5rem] w-full max-w-xs dynamic-border shadow-2xl">
-            <h2 class="text-center font-black mb-5 uppercase text-xs tracking-[0.3em] text-white/50">Membros Online</h2>
-            <div id="users-list" class="space-y-3 mb-6 max-h-[40vh] overflow-y-auto pr-2"></div>
-            <button onclick="toggleM('users-modal', false)" class="w-full py-4 rounded-2xl bg-white/10 font-black border-2 border-white/10 text-[10px] tracking-widest uppercase">FECHAR PAINEL</button>
-        </div>
-    </div>
+    <footer class="text-center mt-5 text-gray-500 text-sm">
+        Made By: <a href="https://instagram.com/085_Teuzinnn" target="_blank" class="text-blue-400 hover:text-blue-300 font-semibold transition duration-200">@085_Teuzinnn</a>
+    </footer>
 
     <script>
-        // Configuração Firebase (Sua configuração original mantida)
-        const config = {
-            apiKey: "AIzaSyBq9-vsFpAgEtXJ--KH6knNKEpXXVgkGrc",
-            authDomain: "conexao-geral-teuzin.firebaseapp.com",
-            databaseURL: "https://conexao-geral-teuzin-default-rtdb.firebaseio.com",
-            projectId: "conexao-geral-teuzin",
-            storageBucket: "conexao-geral-teuzin.firebasestorage.app",
-            messagingSenderId: "153059359862",
-            appId: "1:153059359862:web:c9e69bbb151748cd8d7357"
+        const myIdDisplay = document.getElementById('my-id');
+        const peerIdInput = document.getElementById('peer-id');
+        const callBtn = document.getElementById('call-btn');
+        const hangupBtn = document.getElementById('hangup-btn');
+        const statusText = document.getElementById('status');
+        const videoGrid = document.getElementById('video-grid');
+        const localVideo = document.getElementById('local-video');
+        const remoteVideo = document.getElementById('remote-video');
+
+        let peer = new Peer();
+        let localStream;
+        let currentCall;
+
+        peer.on('open', (id) => {
+            myIdDisplay.innerText = id;
+            statusText.innerText = "Pronto para conectar";
+        });
+
+        async function startMedia() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                localVideo.srcObject = localStream;
+                videoGrid.style.display = 'grid';
+                return true;
+            } catch (err) {
+                statusText.innerText = "Erro ao acessar câmera/microfone";
+                return false;
+            }
+        }
+
+        callBtn.onclick = async () => {
+            const remoteId = peerIdInput.value;
+            if (!remoteId) return alert("Insira um ID!");
+            
+            const hasMedia = await startMedia();
+            if (hasMedia) {
+                statusText.innerText = "Chamando...";
+                const call = peer.call(remoteId, localStream);
+                handleCall(call);
+            }
         };
 
-        firebase.initializeApp(config);
-        const db = firebase.database();
-        let myNick, pc, stream, isMic = true;
-        let pendingIceCandidates = [];
-        const ice = { iceServers: [{ urls: 'stun:stun1.l.google.com:19302' }, { urls: 'stun:stun2.l.google.com:19302' }] };
-
-        // Carregamento Inicial
-        const savedNick = localStorage.getItem('cb_nick');
-        if(savedNick) document.getElementById('username').value = savedNick;
-        applyTheme(localStorage.getItem('cb_color') || '#ff8c00');
-
-        function toggleM(id, s) { 
-            const el = document.getElementById(id);
-            if(s) { el.classList.remove('modal-hidden'); el.classList.add('modal-flex'); }
-            else { el.classList.remove('modal-flex'); el.classList.add('modal-hidden'); }
-        }
-
-        function setTheme(c) { localStorage.setItem('cb_color', c); applyTheme(c); }
-        function applyTheme(c) { 
-            document.querySelectorAll('.dynamic-border').forEach(e => e.style.borderColor = c);
-            const btn = document.getElementById('connect-btn');
-            if(btn) btn.style.boxShadow = `0 10px 20px -10px ${c}66`;
-        }
-
-        function clearN() { localStorage.removeItem('cb_nick'); location.reload(); }
-
-        async function connect() {
-            const rawNick = document.getElementById('username').value.trim();
-            myNick = rawNick.replace(/[.#$[\]]/g, ""); // Sanitização para Firebase
-            
-            if(myNick.length < 3) return alert("Apelido muito curto!");
-            
-            const usersSnap = await db.ref('users').once('value');
-            const currentUsers = Object.values(usersSnap.val() || {});
-            if(currentUsers.includes(myNick)) return alert("Este nome já está na sala!");
-
-            localStorage.setItem('cb_nick', myNick);
-            const userRef = db.ref('users').push(myNick);
-            userRef.onDisconnect().remove();
-
-            document.getElementById('lobby-ui').classList.add('hidden');
-            document.getElementById('btn-config').classList.add('hidden');
-            document.getElementById('call-ui').classList.remove('hidden');
-            document.getElementById('user-display').innerText = `@${myNick}`;
-
-            startEngine();
-        }
-
-        async function startEngine() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                db.ref('msgs').push({ sys: true, txt: `⚡ ${myNick} ESTÁ ONLINE` });
-                
-                setupSignaling();
-                initChat();
-                initUsers();
-            } catch (e) {
-                alert("Erro ao acessar microfone. Verifique as permissões!");
-                console.error(e);
+        peer.on('call', async (call) => {
+            if (confirm("Recebendo chamada! Aceitar?")) {
+                const hasMedia = await startMedia();
+                if (hasMedia) {
+                    call.answer(localStream);
+                    handleCall(call);
+                }
             }
-        }
+        });
 
-        function setupSignaling() {
-            db.ref('call/signal').on('value', async s => {
-                const d = s.val();
-                if(!d || d.from === myNick) return;
-
-                if(d.type === 'offer') {
-                    if(!pc) setupPeer();
-                    await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(d.sdp)));
-                    const ans = await pc.createAnswer();
-                    await pc.setLocalDescription(ans);
-                    db.ref('call/signal').set({ type: 'answer', sdp: JSON.stringify(ans), from: myNick });
-                    processIceQueue();
-                } else if(d.type === 'answer') {
-                    if(pc) await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(d.sdp)));
-                    processIceQueue();
-                }
+        function handleCall(call) {
+            currentCall = call;
+            callBtn.style.display = 'none';
+            hangupBtn.style.display = 'block';
+            
+            call.on('stream', (remoteStream) => {
+                remoteVideo.srcObject = remoteStream;
+                statusText.innerText = "Em chamada";
             });
 
-            db.ref('call/ice').on('child_added', s => {
-                const c = JSON.parse(s.val());
-                if(c.from === myNick) return;
-                
-                const candidate = new RTCIceCandidate(c.cand);
-                if(pc && pc.remoteDescription) {
-                    pc.addIceCandidate(candidate);
-                } else {
-                    pendingIceCandidates.push(candidate);
-                }
+            call.on('close', () => {
+                endCall();
             });
-
-            // Inicia chamada se for o primeiro
-            setTimeout(async () => {
-                if(!pc) {
-                    setupPeer();
-                    const offer = await pc.createOffer();
-                    await pc.setLocalDescription(offer);
-                    db.ref('call/signal').set({ type: 'offer', sdp: JSON.stringify(offer), from: myNick });
-                }
-            }, 1000);
         }
 
-        function processIceQueue() {
-            while(pendingIceCandidates.length > 0) {
-                pc.addIceCandidate(pendingIceCandidates.shift());
+        function endCall() {
+            if (currentCall) currentCall.close();
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
             }
+            videoGrid.style.display = 'none';
+            callBtn.style.display = 'block';
+            hangupBtn.style.display = 'none';
+            statusText.innerText = "Chamada encerrada";
         }
 
-        function setupPeer() {
-            pc = new RTCPeerConnection(ice);
-            stream.getTracks().forEach(t => pc.addTrack(t, stream));
-            
-            pc.onicecandidate = e => {
-                if(e.candidate) {
-                    db.ref('call/ice').push(JSON.stringify({ from: myNick, cand: e.candidate }));
-                }
-            };
-
-            pc.ontrack = e => {
-                const audio = new Audio();
-                audio.srcObject = e.streams[0];
-                audio.autoplay = true;
-                audio.play().catch(console.error);
-            };
-
-            pc.onconnectionstatechange = () => {
-                const status = document.getElementById('connection-status');
-                if(pc.connectionState === 'connected') {
-                    status.innerText = "● Conexão Segura";
-                    status.className = "text-[8px] text-green-400 font-bold uppercase mt-1";
-                }
-            };
-        }
-
-        function initChat() {
-            db.ref('msgs').limitToLast(50).on('value', s => {
-                const box = document.getElementById('chat-messages');
-                const isAtBottom = box.scrollHeight - box.clientHeight <= box.scrollTop + 100;
-                
-                box.innerHTML = "";
-                const themeColor = localStorage.getItem('cb_color') || '#ff8c00';
-                
-                s.forEach(c => {
-                    const d = c.val();
-                    const div = document.createElement('div');
-                    
-                    if(d.sys) {
-                        div.className = "text-center text-[8px] font-black text-white/30 tracking-[0.2em] py-2 uppercase msg-anim";
-                        div.textContent = d.txt;
-                    } else {
-                        const isMine = d.user === myNick;
-                        div.className = `p-4 rounded-[1.5rem] border border-white/5 msg-anim flex flex-col ${isMine ? 'bg-white/10 self-end' : 'bg-white/5 self-start'} max-w-[85%] shadow-lg`;
-                        div.innerHTML = `
-                            <span style="color:${themeColor}" class="text-[9px] font-black mb-1 uppercase tracking-tighter">${d.user}</span>
-                            <p class="text-sm text-white/90 leading-relaxed">${escapeHtml(d.txt)}</p>
-                        `;
-                    }
-                    box.appendChild(div);
-                });
-
-                if(isAtBottom) box.scrollTop = box.scrollHeight;
-            });
-        }
-
-        function initUsers() {
-            db.ref('users').on('value', s => {
-                const list = document.getElementById('users-list');
-                list.innerHTML = "";
-                s.forEach(u => {
-                    const name = u.val();
-                    const div = document.createElement('div');
-                    div.className = "p-4 bg-white/5 rounded-2xl border border-white/10 text-xs font-bold flex items-center justify-between";
-                    div.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div> 
-                            <span class="opacity-80">${name}</span>
-                        </div>
-                        ${name === myNick ? '<span class="text-[8px] opacity-40">VOCÊ</span>' : ''}
-                    `;
-                    list.appendChild(div);
-                });
-            });
-        }
-
-        function send() {
-            const i = document.getElementById('msg-input');
-            const txt = i.value.trim();
-            if(!txt) return;
-            db.ref('msgs').push({ user: myNick, txt: txt, time: Date.now() });
-            i.value = "";
-        }
-
-        function toggleMic() {
-            isMic = !isMic;
-            stream.getAudioTracks()[0].enabled = isMic;
-            const btn = document.getElementById('mic-btn');
-            const icon = document.getElementById('mic-icon');
-            
-            btn.className = `w-16 h-16 flex items-center justify-center rounded-full btn-action border-white/20 shadow-lg ${isMic ? 'bg-green-600' : 'bg-red-600'}`;
-            icon.innerHTML = isMic ? 
-                `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>` : 
-                `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636"></path>`;
-            
-            db.ref('msgs').push({ sys: true, txt: `🎙️ ${myNick} ${isMic ? 'LIGOU O MIC' : 'SILENCIOU'}` });
-        }
-
-        function clearChat() { 
-            if(confirm("Deseja apagar o histórico para todos?")) {
-                db.ref('msgs').remove();
-            }
-        }
-        
-        function hangUp() {
-            db.ref('msgs').push({ sys: true, txt: `🚪 ${myNick} DESCONECTOU` }).then(() => {
-                // Limpeza WebRTC
-                if(pc) pc.close();
-                if(stream) stream.getTracks().forEach(t => t.stop());
-                location.reload();
-            });
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Event Listeners
-        document.getElementById('msg-input').addEventListener('keypress', e => e.key === 'Enter' && send());
-        
-        // Bloqueia zoom duplo no mobile
-        document.addEventListener('touchstart', (e) => {
-            if (e.touches.length > 1) e.preventDefault();
-        }, { passive: false });
+        hangupBtn.onclick = endCall;
     </script>
 </body>
 </html>
