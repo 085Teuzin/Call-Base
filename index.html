@@ -6,53 +6,71 @@
     <title>Call Base - Made By: @085_Teuzinnn</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
-        body { background-color: #0a0a0a; color: #fff; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
-        h1 { color: #ff4d00; margin-bottom: 10px; font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px; }
-        h2 { height: 0; margin: 0; }
-        .container { width: 90%; max-width: 500px; background: #1a1a1a; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(255, 61, 0, 0.2); text-align: center; border: 1px solid #333; }
-        .id-display { background: #252525; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #ff4d00; }
-        .id-display span { display: block; font-size: 0.8rem; color: #888; }
-        .id-display strong { font-size: 1.2rem; color: #ff8c00; word-break: break-all; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #444; background: #111; color: #fff; outline: none; transition: 0.3s; }
-        input:focus { border-color: #ff4d00; box-shadow: 0 0 8px rgba(255, 77, 0, 0.4); }
-        .controls { display: flex; gap: 10px; margin-top: 20px; }
-        button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
-        .btn-call { background: linear-gradient(45deg, #ff4d00, #ff0000); color: white; }
-        .btn-call:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4); }
-        .btn-hangup { background: #333; color: #fff; display: none; }
-        .btn-hangup:hover { background: #444; }
-        .video-container { margin-top: 20px; display: none; grid-template-columns: 1fr 1fr; gap: 10px; }
-        video { width: 100%; border-radius: 10px; background: #000; border: 1px solid #444; }
-        .status { margin-top: 15px; font-size: 0.9rem; color: #ff8c00; min-height: 1.2em; }
-        footer { margin-top: 30px; color: #666; font-size: 0.85rem; }
-        footer a { color: #ff4d00; text-decoration: none; font-weight: 600; transition: 0.2s; }
-        footer a:hover { color: #ff8c00; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #0d0d0d; color: #fff; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
+        h1 { color: #ff4d00; font-size: 2rem; text-transform: uppercase; margin-bottom: 5px; }
+        h2 { display: none; }
+        .app-container { width: 90%; max-width: 400px; background: #161616; padding: 25px; border-radius: 25px; border: 2px solid #ff3c00; text-align: center; position: relative; }
+        .lobby-section { display: flex; flex-direction: column; gap: 10px; }
+        .id-card { background: #222; padding: 15px; border-radius: 15px; margin: 10px 0; border: 1px dashed #ff4d00; }
+        .id-card strong { color: #ff8c00; display: block; font-size: 1.1rem; cursor: pointer; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; text-align: center; }
+        .btn-orange { background: linear-gradient(45deg, #ff4d00, #ff0000); color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
+        .call-ui { display: none; }
+        .avatar-area { width: 100px; height: 100px; background: #222; border-radius: 50%; margin: 20px auto; border: 3px solid #ff4d00; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
+        .controls-row { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
+        .btn-circle { width: 55px; height: 55px; border-radius: 50%; border: none; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .btn-mic { background: #333; color: white; }
+        .btn-mic.off { background: #ff0000; }
+        .btn-hangup { background: #ff0000; color: white; }
+        .btn-chat { background: #ff8c00; color: white; }
+        #modal-chat { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10; padding: 20px; flex-direction: column; }
+        #chat-content { flex: 1; overflow-y: auto; background: #111; padding: 15px; border-radius: 10px; margin-bottom: 10px; text-align: left; border: 1px solid #333; }
+        .log-msg { font-size: 0.8rem; color: #888; font-style: italic; margin-bottom: 5px; }
+        .chat-msg { margin-bottom: 8px; font-size: 0.95rem; }
+        .chat-msg b { color: #ff4d00; }
+        footer { position: absolute; bottom: 20px; }
+        footer a { color: #ff4d00; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="app-container">
         <h1>Call Base</h1>
         <h2></h2>
 
-        <div class="id-display">
-            <span>Seu ID:</span>
-            <strong id="my-id">Carregando...</strong>
+        <div id="lobby" class="lobby-section">
+            <input type="text" id="nick-input" placeholder="Seu Nickname">
+            <div class="id-card">
+                <small>Seu ID:</small>
+                <strong id="my-id">Gerando...</strong>
+            </div>
+            <input type="text" id="peer-id-input" placeholder="ID do Amigo">
+            <button class="btn-orange" onclick="startCall()">LIGAR 📞</button>
         </div>
 
-        <input type="text" id="peer-id" placeholder="Digite o ID do amigo">
-        
-        <div class="status" id="status">Aguardando...</div>
-
-        <div class="video-container" id="video-grid">
-            <video id="local-video" autoplay muted playsinline></video>
-            <video id="remote-video" autoplay playsinline></video>
+        <div id="call-screen" class="call-ui">
+            <div class="avatar-area">👤</div>
+            <h3 id="remote-nick-display">Conectando...</h3>
+            <p id="call-status" style="color: #888; font-size: 0.9rem;">Em chamada</p>
+            
+            <div class="controls-row">
+                <button class="btn-circle btn-mic" id="mic-btn" onclick="toggleMic()">🎙️</button>
+                <button class="btn-circle btn-chat" onclick="toggleChat(true)">💬</button>
+                <button class="btn-circle btn-hangup" onclick="endCall()">🚫</button>
+            </div>
         </div>
+    </div>
 
-        <div class="controls">
-            <button class="btn-call" id="call-btn">Iniciar Chamada</button>
-            <button class="btn-hangup" id="hangup-btn">Desligar</button>
+    <div id="modal-chat">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3>Chat & Logs</h3>
+            <button onclick="toggleChat(false)" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">✕</button>
+        </div>
+        <div id="chat-content"></div>
+        <div style="display: flex; gap: 5px;">
+            <input type="text" id="chat-input" placeholder="Mensagem...">
+            <button class="btn-orange" style="width: 80px; margin:0;" onclick="sendMessage()">Enviar</button>
         </div>
     </div>
 
@@ -60,86 +78,121 @@
         Made By: <a href="https://instagram.com/085_Teuzinnn" target="_blank" class="text-blue-400 hover:text-blue-300 font-semibold transition duration-200">@085_Teuzinnn</a>
     </footer>
 
-    <script>
-        const myIdDisplay = document.getElementById('my-id');
-        const peerIdInput = document.getElementById('peer-id');
-        const callBtn = document.getElementById('call-btn');
-        const hangupBtn = document.getElementById('hangup-btn');
-        const statusText = document.getElementById('status');
-        const videoGrid = document.getElementById('video-grid');
-        const localVideo = document.getElementById('local-video');
-        const remoteVideo = document.getElementById('remote-video');
+    <audio id="remote-audio" autoplay></audio>
 
+    <script>
+        const myIdElem = document.getElementById('my-id');
+        const chatContent = document.getElementById('chat-content');
+        const nickInput = document.getElementById('nick-input');
         let peer = new Peer();
         let localStream;
+        let currentConn;
         let currentCall;
+        let myNick = "Usuário";
 
-        peer.on('open', (id) => {
-            myIdDisplay.innerText = id;
-            statusText.innerText = "Pronto para conectar";
-        });
+        peer.on('open', id => { myIdElem.innerText = id; });
 
-        async function startMedia() {
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                localVideo.srcObject = localStream;
-                videoGrid.style.display = 'grid';
-                return true;
-            } catch (err) {
-                statusText.innerText = "Erro ao acessar câmera/microfone";
-                return false;
-            }
-        }
-
-        callBtn.onclick = async () => {
-            const remoteId = peerIdInput.value;
-            if (!remoteId) return alert("Insira um ID!");
-            
-            const hasMedia = await startMedia();
-            if (hasMedia) {
-                statusText.innerText = "Chamando...";
-                const call = peer.call(remoteId, localStream);
-                handleCall(call);
-            }
+        myIdElem.onclick = () => {
+            navigator.clipboard.writeText(myIdElem.innerText);
+            alert("ID Copiado!");
         };
 
-        peer.on('call', async (call) => {
-            if (confirm("Recebendo chamada! Aceitar?")) {
-                const hasMedia = await startMedia();
-                if (hasMedia) {
-                    call.answer(localStream);
-                    handleCall(call);
+        async function initMedia() {
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            return localStream;
+        }
+
+        function addLog(msg, isSystem = true) {
+            const div = document.createElement('div');
+            div.className = isSystem ? 'log-msg' : 'chat-msg';
+            div.innerHTML = msg;
+            chatContent.appendChild(div);
+            chatContent.scrollTop = chatContent.scrollHeight;
+        }
+
+        function setupConnection(conn) {
+            currentConn = conn;
+            conn.on('open', () => {
+                conn.send({ type: 'nick', val: myNick });
+                addLog(`<b>Sistema:</b> Você entrou na sala.`);
+            });
+            conn.on('data', data => {
+                if(data.type === 'nick') {
+                    document.getElementById('remote-nick-display').innerText = data.val;
+                    addLog(`<b>${data.val}</b> entrou na conversa.`);
+                } else if(data.type === 'msg') {
+                    addLog(`<b>${data.from}:</b> ${data.val}`, false);
+                } else if(data.type === 'action') {
+                    addLog(`<i>${data.val}</i>`);
                 }
+            });
+        }
+
+        async function startCall() {
+            myNick = nickInput.value || "Anônimo";
+            const remoteId = document.getElementById('peer-id-input').value;
+            if(!remoteId) return alert("Insira o ID!");
+
+            const stream = await initMedia();
+            const call = peer.call(remoteId, stream);
+            const conn = peer.connect(remoteId);
+            
+            showCallUI();
+            handleCall(call);
+            setupConnection(conn);
+        }
+
+        peer.on('connection', setupConnection);
+        peer.on('call', async call => {
+            if(confirm("Atender chamada de áudio?")) {
+                myNick = nickInput.value || "Anônimo";
+                const stream = await initMedia();
+                call.answer(stream);
+                showCallUI();
+                handleCall(call);
             }
         });
 
         function handleCall(call) {
             currentCall = call;
-            callBtn.style.display = 'none';
-            hangupBtn.style.display = 'block';
-            
-            call.on('stream', (remoteStream) => {
-                remoteVideo.srcObject = remoteStream;
-                statusText.innerText = "Em chamada";
+            call.on('stream', stream => {
+                document.getElementById('remote-audio').srcObject = stream;
             });
+            call.on('close', endCall);
+        }
 
-            call.on('close', () => {
-                endCall();
-            });
+        function showCallUI() {
+            document.getElementById('lobby').style.display = 'none';
+            document.getElementById('call-screen').style.display = 'block';
+        }
+
+        function toggleMic() {
+            const audioTrack = localStream.getAudioTracks()[0];
+            audioTrack.enabled = !audioTrack.enabled;
+            const btn = document.getElementById('mic-btn');
+            const state = audioTrack.enabled ? "Ligou" : "Desligou";
+            btn.classList.toggle('off');
+            btn.innerText = audioTrack.enabled ? "🎙️" : "🔇";
+            currentConn.send({ type: 'action', val: `${myNick} ${state} o Mic` });
+            addLog(`Você ${state} o Mic`);
+        }
+
+        function toggleChat(show) {
+            document.getElementById('modal-chat').style.display = show ? 'flex' : 'none';
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            if(!input.value) return;
+            currentConn.send({ type: 'msg', from: myNick, val: input.value });
+            addLog(`<b>Você:</b> ${input.value}`, false);
+            input.value = "";
         }
 
         function endCall() {
-            if (currentCall) currentCall.close();
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-            }
-            videoGrid.style.display = 'none';
-            callBtn.style.display = 'block';
-            hangupBtn.style.display = 'none';
-            statusText.innerText = "Chamada encerrada";
+            if(currentConn) currentConn.send({ type: 'action', val: `${myNick} saiu da chamada.` });
+            location.reload();
         }
-
-        hangupBtn.onclick = endCall;
     </script>
 </body>
 </html>
