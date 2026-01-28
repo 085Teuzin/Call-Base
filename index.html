@@ -14,7 +14,8 @@
         .lobby-section { display: flex; flex-direction: column; gap: 10px; }
         .id-card { background: #222; padding: 15px; border-radius: 15px; margin: 10px 0; border: 1px dashed #ff4d00; }
         .id-card strong { color: #ff8c00; display: block; font-size: 1.1rem; cursor: pointer; }
-        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; text-align: center; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; text-align: center; outline: none; }
+        input:focus { border-color: #ff4d00; }
         .btn-orange { background: linear-gradient(45deg, #ff4d00, #ff0000); color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
         .call-ui { display: none; }
         .avatar-area { width: 100px; height: 100px; background: #222; border-radius: 50%; margin: 20px auto; border: 3px solid #ff4d00; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
@@ -24,11 +25,9 @@
         .btn-mic.off { background: #ff0000; }
         .btn-hangup { background: #ff0000; color: white; }
         .btn-chat { background: #ff8c00; color: white; }
-        #modal-chat { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10; padding: 20px; flex-direction: column; }
+        #modal-chat { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10; padding: 20px; flex-direction: column; }
         #chat-content { flex: 1; overflow-y: auto; background: #111; padding: 15px; border-radius: 10px; margin-bottom: 10px; text-align: left; border: 1px solid #333; }
-        .log-msg { font-size: 0.8rem; color: #888; font-style: italic; margin-bottom: 5px; }
-        .chat-msg { margin-bottom: 8px; font-size: 0.95rem; }
-        .chat-msg b { color: #ff4d00; }
+        .msg { font-size: 0.9rem; margin-bottom: 5px; border-bottom: 1px solid #222; padding-bottom: 2px; }
         footer { position: absolute; bottom: 20px; }
         footer a { color: #ff4d00; text-decoration: none; font-weight: bold; }
     </style>
@@ -37,22 +36,23 @@
 
     <div class="app-container">
         <h1>Call Base</h1>
-        <h2></h2>
+        <h2>Chamada De Voz</h2>
 
         <div id="lobby" class="lobby-section">
-            <input type="text" id="nick-input" placeholder="Seu Nickname">
+            <input type="text" id="nick-input" placeholder="Seu Nick">
             <div class="id-card">
                 <small>Seu ID:</small>
-                <strong id="my-id">Gerando...</strong>
+                <strong id="my-id">Iniciando...</strong>
             </div>
             <input type="text" id="peer-id-input" placeholder="ID do Amigo">
             <button class="btn-orange" onclick="startCall()">LIGAR 📞</button>
+            <p style="font-size: 0.7rem; color: #666; margin-top: 5px;">*Certifique-se de permitir o microfone</p>
         </div>
 
         <div id="call-screen" class="call-ui">
             <div class="avatar-area">👤</div>
-            <h3 id="remote-nick-display">Conectando...</h3>
-            <p id="call-status" style="color: #888; font-size: 0.9rem;">Em chamada</p>
+            <h3 id="remote-nick-display">Conectado</h3>
+            <p id="call-status" style="color: #00ff00; font-size: 0.8rem; margin-top: 5px;">• Online</p>
             
             <div class="controls-row">
                 <button class="btn-circle btn-mic" id="mic-btn" onclick="toggleMic()">🎙️</button>
@@ -63,12 +63,12 @@
     </div>
 
     <div id="modal-chat">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3>Chat & Logs</h3>
-            <button onclick="toggleChat(false)" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">✕</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3>Chat & Histórico</h3>
+            <button onclick="toggleChat(false)" style="background:none; border:none; color:white; font-size:1.8rem; cursor:pointer;">✕</button>
         </div>
         <div id="chat-content"></div>
-        <div style="display: flex; gap: 5px;">
+        <div style="display: flex; gap: 8px;">
             <input type="text" id="chat-input" placeholder="Mensagem...">
             <button class="btn-orange" style="width: 80px; margin:0;" onclick="sendMessage()">Enviar</button>
         </div>
@@ -84,11 +84,17 @@
         const myIdElem = document.getElementById('my-id');
         const chatContent = document.getElementById('chat-content');
         const nickInput = document.getElementById('nick-input');
+        const remoteAudio = document.getElementById('remote-audio');
         let peer = new Peer();
         let localStream;
         let currentConn;
         let currentCall;
-        let myNick = "Usuário";
+        let myNick = "User";
+
+        // Solicita microfone assim que o script carrega
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => { localStream = stream; console.log("Microfone OK"); })
+            .catch(err => { alert("Acesso ao microfone negado! O app não funcionará."); });
 
         peer.on('open', id => { myIdElem.innerText = id; });
 
@@ -97,15 +103,10 @@
             alert("ID Copiado!");
         };
 
-        async function initMedia() {
-            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            return localStream;
-        }
-
-        function addLog(msg, isSystem = true) {
+        function addLog(name, action) {
             const div = document.createElement('div');
-            div.className = isSystem ? 'log-msg' : 'chat-msg';
-            div.innerHTML = msg;
+            div.className = 'msg';
+            div.innerHTML = `<b style="color:#ff4d00">${name}:</b> ${action}`;
             chatContent.appendChild(div);
             chatContent.scrollTop = chatContent.scrollHeight;
         }
@@ -113,52 +114,53 @@
         function setupConnection(conn) {
             currentConn = conn;
             conn.on('open', () => {
+                myNick = nickInput.value || "User";
                 conn.send({ type: 'nick', val: myNick });
-                addLog(`<b>Sistema:</b> Você entrou na sala.`);
+                addLog(myNick, "Entrou");
+                showCallUI();
             });
             conn.on('data', data => {
                 if(data.type === 'nick') {
                     document.getElementById('remote-nick-display').innerText = data.val;
-                    addLog(`<b>${data.val}</b> entrou na conversa.`);
+                    addLog(data.val, "Entrou");
                 } else if(data.type === 'msg') {
-                    addLog(`<b>${data.from}:</b> ${data.val}`, false);
+                    addLog(data.from, data.val);
                 } else if(data.type === 'action') {
-                    addLog(`<i>${data.val}</i>`);
+                    addLog(data.from, data.val);
                 }
             });
+            conn.on('close', () => { location.reload(); });
         }
 
         async function startCall() {
-            myNick = nickInput.value || "Anônimo";
+            myNick = nickInput.value || "User";
             const remoteId = document.getElementById('peer-id-input').value;
             if(!remoteId) return alert("Insira o ID!");
 
-            const stream = await initMedia();
-            const call = peer.call(remoteId, stream);
+            if(!localStream) localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            
+            const call = peer.call(remoteId, localStream);
             const conn = peer.connect(remoteId);
             
-            showCallUI();
             handleCall(call);
             setupConnection(conn);
         }
 
         peer.on('connection', setupConnection);
+
         peer.on('call', async call => {
-            if(confirm("Atender chamada de áudio?")) {
-                myNick = nickInput.value || "Anônimo";
-                const stream = await initMedia();
-                call.answer(stream);
-                showCallUI();
-                handleCall(call);
-            }
+            // Atendimento Automático
+            if(!localStream) localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            call.answer(localStream);
+            handleCall(call);
         });
 
         function handleCall(call) {
             currentCall = call;
             call.on('stream', stream => {
-                document.getElementById('remote-audio').srcObject = stream;
+                remoteAudio.srcObject = stream;
+                remoteAudio.play();
             });
-            call.on('close', endCall);
         }
 
         function showCallUI() {
@@ -170,11 +172,11 @@
             const audioTrack = localStream.getAudioTracks()[0];
             audioTrack.enabled = !audioTrack.enabled;
             const btn = document.getElementById('mic-btn');
-            const state = audioTrack.enabled ? "Ligou" : "Desligou";
+            const action = audioTrack.enabled ? "Ativou Mic" : "Mutou Mic";
             btn.classList.toggle('off');
             btn.innerText = audioTrack.enabled ? "🎙️" : "🔇";
-            currentConn.send({ type: 'action', val: `${myNick} ${state} o Mic` });
-            addLog(`Você ${state} o Mic`);
+            currentConn.send({ type: 'action', from: myNick, val: action });
+            addLog(myNick, action);
         }
 
         function toggleChat(show) {
@@ -185,13 +187,13 @@
             const input = document.getElementById('chat-input');
             if(!input.value) return;
             currentConn.send({ type: 'msg', from: myNick, val: input.value });
-            addLog(`<b>Você:</b> ${input.value}`, false);
+            addLog(myNick, input.value);
             input.value = "";
         }
 
         function endCall() {
-            if(currentConn) currentConn.send({ type: 'action', val: `${myNick} saiu da chamada.` });
-            location.reload();
+            if(currentConn) currentConn.send({ type: 'action', from: myNick, val: "Saiu" });
+            setTimeout(() => { location.reload(); }, 500);
         }
     </script>
 </body>
