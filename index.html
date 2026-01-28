@@ -3,79 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Call Base - Made By: @085_Teuzinnn</title>
+    <title>Call Base V2 - @085_Teuzinnn</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #0d0d0d; color: #fff; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
-        h1 { color: #ff4d00; font-size: 2rem; text-transform: uppercase; margin-bottom: 5px; }
-        h2 { display: none; }
-        .app-container { width: 90%; max-width: 400px; background: #161616; padding: 25px; border-radius: 25px; border: 2px solid #ff3c00; text-align: center; position: relative; }
-        .lobby-section { display: flex; flex-direction: column; gap: 10px; }
-        .id-card { background: #222; padding: 15px; border-radius: 15px; margin: 10px 0; border: 1px dashed #ff4d00; }
-        .id-card strong { color: #ff8c00; display: block; font-size: 1.1rem; cursor: pointer; }
-        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; text-align: center; outline: none; }
-        input:focus { border-color: #ff4d00; }
-        .btn-orange { background: linear-gradient(45deg, #ff4d00, #ff0000); color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', 'Segoe UI', sans-serif; }
+        body { 
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%); 
+            color: #fff; height: 100vh; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; overflow: hidden; 
+        }
+        .app-container { 
+            width: 90%; max-width: 420px; background: rgba(22, 22, 22, 0.95); 
+            padding: 30px; border-radius: 30px; border: 1px solid #ff4d00; 
+            box-shadow: 0 0 20px rgba(255, 77, 0, 0.2); text-align: center; 
+            backdrop-filter: blur(10px);
+        }
+        h1 { color: #ff4d00; font-size: 2.2rem; letter-spacing: -1px; margin-bottom: 20px; }
+        .id-card { 
+            background: #111; padding: 15px; border-radius: 15px; margin: 15px 0; 
+            border: 1px solid #333; transition: 0.3s; cursor: pointer;
+        }
+        .id-card:hover { border-color: #ff4d00; background: #1a1a1a; }
+        .id-card strong { color: #ff8c00; font-family: monospace; font-size: 1.2rem; }
+        input { 
+            width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #333; 
+            background: #050505; color: #fff; text-align: center; margin-bottom: 10px;
+            transition: 0.3s;
+        }
+        input:focus { border-color: #ff4d00; box-shadow: 0 0 10px rgba(255, 77, 0, 0.3); }
+        .btn-orange { 
+            background: linear-gradient(135deg, #ff4d00, #ff0000); color: #fff; 
+            border: none; padding: 15px; border-radius: 12px; font-weight: 800; 
+            cursor: pointer; width: 100%; transition: transform 0.2s;
+        }
+        .btn-orange:active { transform: scale(0.98); }
         .call-ui { display: none; }
-        .avatar-area { width: 100px; height: 100px; background: #222; border-radius: 50%; margin: 20px auto; border: 3px solid #ff4d00; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
-        .controls-row { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
-        .btn-circle { width: 55px; height: 55px; border-radius: 50%; border: none; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
-        .btn-mic { background: #333; color: white; }
-        .btn-mic.off { background: #ff0000; }
-        .btn-hangup { background: #ff0000; color: white; }
-        .btn-chat { background: #ff8c00; color: white; }
-        #modal-chat { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10; padding: 20px; flex-direction: column; }
-        #chat-content { flex: 1; overflow-y: auto; background: #111; padding: 15px; border-radius: 10px; margin-bottom: 10px; text-align: left; border: 1px solid #333; }
-        .msg { font-size: 0.9rem; margin-bottom: 5px; border-bottom: 1px solid #222; padding-bottom: 2px; }
-        footer { position: absolute; bottom: 20px; }
-        footer a { color: #ff4d00; text-decoration: none; font-weight: bold; }
+        .avatar-area { 
+            width: 120px; height: 120px; background: #111; border-radius: 50%; 
+            margin: 20px auto; border: 4px solid #ff4d00; display: flex; 
+            align-items: center; justify-content: center; font-size: 3.5rem;
+            position: relative;
+        }
+        .pulse {
+            position: absolute; width: 100%; height: 100%; border-radius: 50%;
+            border: 2px solid #ff4d00; animation: pulse-ani 2s infinite;
+        }
+        @keyframes pulse-ani { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.5); opacity: 0; } }
+        .timer { font-family: monospace; color: #aaa; margin-bottom: 15px; display: block; }
+        .controls-row { display: flex; justify-content: center; gap: 20px; margin-top: 25px; }
+        .btn-circle { 
+            width: 60px; height: 60px; border-radius: 50%; border: none; 
+            font-size: 1.5rem; cursor: pointer; display: flex; 
+            align-items: center; justify-content: center; transition: 0.3s;
+        }
+        .btn-mic { background: #222; color: white; }
+        .btn-mic.off { background: #ff0000; box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); }
+        .btn-hangup { background: #ff0000; color: white; transform: rotate(135deg); }
+        .btn-chat { background: #ff8c00; color: white; position: relative; }
+        .badge { position: absolute; top: -5px; right: -5px; background: white; color: black; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; display: none; align-items: center; justify-content: center; font-weight: bold; }
+        #modal-chat { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.98); z-index: 100; padding: 25px; flex-direction: column; 
+        }
+        #chat-content { 
+            flex: 1; overflow-y: auto; background: #0a0a0a; padding: 20px; 
+            border-radius: 15px; margin-bottom: 15px; border: 1px solid #222; 
+        }
+        .msg { margin-bottom: 10px; line-height: 1.4; padding: 8px 12px; background: #161616; border-radius: 8px; width: fit-content; max-width: 80%; }
+        .msg.me { background: #ff4d00; margin-left: auto; }
+        footer { position: absolute; bottom: 20px; font-size: 0.8rem; opacity: 0.6; }
+        footer a { color: #ff4d00; text-decoration: none; }
+        .toast { position: fixed; top: 20px; background: #ff4d00; padding: 10px 20px; border-radius: 50px; font-weight: bold; transform: translateY(-100px); transition: 0.5s; z-index: 1000; }
+        .toast.show { transform: translateY(0); }
     </style>
 </head>
 <body>
 
+    <div id="toast" class="toast">ID Copiado!</div>
+
     <div class="app-container">
         <h1>Call Base</h1>
-        <h2>Chamada De Voz</h2>
 
         <div id="lobby" class="lobby-section">
-            <input type="text" id="nick-input" placeholder="Seu Nick">
-            <div class="id-card">
-                <small>Seu ID:</small>
-                <strong id="my-id">Iniciando...</strong>
+            <input type="text" id="nick-input" placeholder="Digite seu Nome">
+            <div class="id-card" onclick="copyId()">
+                <small style="color:#666">SEU ID (Clique para copiar)</small><br>
+                <strong id="my-id">...</strong>
             </div>
             <input type="text" id="peer-id-input" placeholder="ID do Amigo">
-            <button class="btn-orange" onclick="startCall()">LIGAR 📞</button>
-            <p style="font-size: 0.7rem; color: #666; margin-top: 5px;">*Certifique-se de permitir o microfone</p>
+            <button class="btn-orange" onclick="startCall()">INICIAR CHAMADA 📞</button>
         </div>
 
         <div id="call-screen" class="call-ui">
-            <div class="avatar-area">👤</div>
-            <h3 id="remote-nick-display">Conectado</h3>
-            <p id="call-status" style="color: #00ff00; font-size: 0.8rem; margin-top: 5px;">• Online</p>
+            <div class="avatar-area">
+                <div id="voice-pulse" class=""></div>
+                👤
+            </div>
+            <h3 id="remote-nick-display">Conectando...</h3>
+            <span class="timer" id="call-timer">00:00</span>
             
             <div class="controls-row">
                 <button class="btn-circle btn-mic" id="mic-btn" onclick="toggleMic()">🎙️</button>
-                <button class="btn-circle btn-chat" onclick="toggleChat(true)">💬</button>
-                <button class="btn-circle btn-hangup" onclick="endCall()">🚫</button>
+                <button class="btn-circle btn-chat" onclick="toggleChat(true)">
+                    💬
+                    <div id="chat-badge" class="badge">0</div>
+                </button>
+                <button class="btn-circle btn-hangup" onclick="endCall()">📞</button>
             </div>
         </div>
     </div>
 
     <div id="modal-chat">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3>Chat & Histórico</h3>
-            <button onclick="toggleChat(false)" style="background:none; border:none; color:white; font-size:1.8rem; cursor:pointer;">✕</button>
+            <h2>Chat ao Vivo</h2>
+            <button onclick="toggleChat(false)" style="background:none; border:none; color:white; font-size:2rem; cursor:pointer;">✕</button>
         </div>
         <div id="chat-content"></div>
-        <div style="display: flex; gap: 8px;">
-            <input type="text" id="chat-input" placeholder="Mensagem...">
-            <button class="btn-orange" style="width: 80px; margin:0;" onclick="sendMessage()">Enviar</button>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="chat-input" placeholder="Escreva algo..." onkeypress="handleChatKey(event)">
+            <button class="btn-orange" style="width: 100px; margin:0;" onclick="sendMessage()">Enviar</button>
         </div>
     </div>
 
-    <footer class="text-center mt-5 text-gray-500 text-sm">
-        Made By: <a href="https://instagram.com/085_Teuzinnn" target="_blank" class="text-blue-400 hover:text-blue-300 font-semibold transition duration-200">@085_Teuzinnn</a>
+    <footer>
+        Desenvolvido por <a href="https://instagram.com/085_Teuzinnn" target="_blank">@085_Teuzinnn</a>
     </footer>
 
     <audio id="remote-audio" autoplay></audio>
@@ -85,57 +136,87 @@
         const chatContent = document.getElementById('chat-content');
         const nickInput = document.getElementById('nick-input');
         const remoteAudio = document.getElementById('remote-audio');
+        const chatBadge = document.getElementById('chat-badge');
+        
         let peer = new Peer();
         let localStream;
         let currentConn;
         let currentCall;
         let myNick = "User";
+        let timerInterval;
+        let seconds = 0;
+        let unreadCount = 0;
 
-        // Solicita microfone assim que o script carrega
-        navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(stream => { localStream = stream; console.log("Microfone OK"); })
-            .catch(err => { alert("Acesso ao microfone negado! O app não funcionará."); });
+        nickInput.value = localStorage.getItem('last-nick') || "";
+
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => { 
+            localStream = stream; 
+        }).catch(() => { showToast("Erro: Microfone Necessário"); });
 
         peer.on('open', id => { myIdElem.innerText = id; });
 
-        myIdElem.onclick = () => {
-            navigator.clipboard.writeText(myIdElem.innerText);
-            alert("ID Copiado!");
-        };
+        function showToast(text) {
+            const t = document.getElementById('toast');
+            t.innerText = text;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
 
-        function addLog(name, action) {
+        function copyId() {
+            navigator.clipboard.writeText(myIdElem.innerText);
+            showToast("ID Copiado com Sucesso!");
+        }
+
+        function startTimer() {
+            seconds = 0;
+            timerInterval = setInterval(() => {
+                seconds++;
+                const min = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const sec = (seconds % 60).toString().padStart(2, '0');
+                document.getElementById('call-timer').innerText = `${min}:${sec}`;
+            }, 1000);
+        }
+
+        function addLog(name, action, isMe = false) {
             const div = document.createElement('div');
-            div.className = 'msg';
-            div.innerHTML = `<b style="color:#ff4d00">${name}:</b> ${action}`;
+            div.className = `msg ${isMe ? 'me' : ''}`;
+            div.innerHTML = `<strong>${name}:</strong><br>${action}`;
             chatContent.appendChild(div);
             chatContent.scrollTop = chatContent.scrollHeight;
+            
+            if(!isMe && document.getElementById('modal-chat').style.display !== 'flex') {
+                unreadCount++;
+                chatBadge.innerText = unreadCount;
+                chatBadge.style.display = 'flex';
+            }
         }
 
         function setupConnection(conn) {
             currentConn = conn;
             conn.on('open', () => {
-                myNick = nickInput.value || "User";
+                myNick = nickInput.value || "Anônimo";
+                localStorage.setItem('last-nick', myNick);
                 conn.send({ type: 'nick', val: myNick });
-                addLog(myNick, "Entrou");
                 showCallUI();
+                startTimer();
             });
             conn.on('data', data => {
                 if(data.type === 'nick') {
                     document.getElementById('remote-nick-display').innerText = data.val;
-                    addLog(data.val, "Entrou");
+                    showToast(`${data.val} entrou na call`);
                 } else if(data.type === 'msg') {
-                    addLog(data.from, data.val);
+                    addLog(data.from, data.val, false);
                 } else if(data.type === 'action') {
-                    addLog(data.from, data.val);
+                    showToast(`${data.from} ${data.val}`);
                 }
             });
-            conn.on('close', () => { location.reload(); });
+            conn.on('close', () => { endCall(); });
         }
 
         async function startCall() {
-            myNick = nickInput.value || "User";
+            if(!nickInput.value) return showToast("Digite seu nick primeiro!");
             const remoteId = document.getElementById('peer-id-input').value;
-            if(!remoteId) return alert("Insira o ID!");
+            if(!remoteId) return showToast("Insira o ID do amigo!");
 
             if(!localStream) localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
             
@@ -149,7 +230,6 @@
         peer.on('connection', setupConnection);
 
         peer.on('call', async call => {
-            // Atendimento Automático
             if(!localStream) localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
             call.answer(localStream);
             handleCall(call);
@@ -159,7 +239,7 @@
             currentCall = call;
             call.on('stream', stream => {
                 remoteAudio.srcObject = stream;
-                remoteAudio.play();
+                document.getElementById('voice-pulse').className = 'pulse';
             });
         }
 
@@ -172,28 +252,33 @@
             const audioTrack = localStream.getAudioTracks()[0];
             audioTrack.enabled = !audioTrack.enabled;
             const btn = document.getElementById('mic-btn');
-            const action = audioTrack.enabled ? "Ativou Mic" : "Mutou Mic";
+            const action = audioTrack.enabled ? "Ativou o Mic" : "Mutou o Mic";
             btn.classList.toggle('off');
             btn.innerText = audioTrack.enabled ? "🎙️" : "🔇";
             currentConn.send({ type: 'action', from: myNick, val: action });
-            addLog(myNick, action);
         }
 
         function toggleChat(show) {
             document.getElementById('modal-chat').style.display = show ? 'flex' : 'none';
+            if(show) {
+                unreadCount = 0;
+                chatBadge.style.display = 'none';
+            }
         }
+
+        function handleChatKey(e) { if(e.key === 'Enter') sendMessage(); }
 
         function sendMessage() {
             const input = document.getElementById('chat-input');
             if(!input.value) return;
             currentConn.send({ type: 'msg', from: myNick, val: input.value });
-            addLog(myNick, input.value);
+            addLog(myNick, input.value, true);
             input.value = "";
         }
 
         function endCall() {
-            if(currentConn) currentConn.send({ type: 'action', from: myNick, val: "Saiu" });
-            setTimeout(() => { location.reload(); }, 500);
+            if(currentConn) currentConn.send({ type: 'action', from: myNick, val: "desconectou" });
+            location.reload();
         }
     </script>
 </body>
