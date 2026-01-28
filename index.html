@@ -3,84 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Call Base Pro - @085_Teuzinnn</title>
+    <title>Call Base - @085_Teuzinnn</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { 
-            background: #0a0a0a; color: #fff; height: 100vh; display: flex; 
-            flex-direction: column; justify-content: center; align-items: center; 
-        }
-        .app-container { 
-            width: 90%; max-width: 420px; background: #121212; padding: 30px; 
-            border-radius: 30px; border: 1px solid #ff4d00; text-align: center; 
-        }
+        body { background: #0a0a0a; color: #fff; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .app-container { width: 90%; max-width: 420px; background: #121212; padding: 30px; border-radius: 30px; border: 1px solid #ff4d00; text-align: center; position: relative; }
         h1 { color: #ff4d00; margin-bottom: 20px; font-size: 1.8rem; }
-        .id-card { 
-            background: #1a1a1a; padding: 15px; border-radius: 15px; margin: 15px 0; 
-            border: 1px dashed #ff4d00; cursor: pointer;
-        }
-        #qrcode { 
-            background: white; padding: 10px; border-radius: 10px; 
-            margin: 15px auto; width: 128px; height: 128px;
-        }
-        input { 
-            width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #333; 
-            background: #000; color: #fff; text-align: center; margin-bottom: 10px;
-        }
-        .btn-orange { 
-            background: linear-gradient(135deg, #ff4d00, #ff0000); color: #fff; 
-            border: none; padding: 15px; border-radius: 12px; font-weight: bold; 
-            cursor: pointer; width: 100%; margin-top: 5px;
-        }
-        .btn-share {
-            background: #25d366; color: white; border: none; padding: 10px;
-            border-radius: 10px; width: 100%; margin-top: 10px; cursor: pointer; font-weight: bold;
-        }
+        .id-card { background: #1a1a1a; padding: 15px; border-radius: 15px; margin: 15px 0; border: 1px dashed #ff4d00; cursor: pointer; }
+        input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #333; background: #000; color: #fff; text-align: center; margin-bottom: 10px; }
+        .btn-orange { background: linear-gradient(135deg, #ff4d00, #ff0000); color: #fff; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
+        .btn-share-floating { position: absolute; top: 15px; right: 15px; width: 40px; height: 40px; border-radius: 50%; background: #25d366; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .version-tag { position: absolute; top: 60px; right: 15px; font-size: 0.65rem; color: #555; font-weight: bold; }
         .call-ui { display: none; }
         .controls-row { display: flex; justify-content: center; gap: 20px; margin-top: 25px; }
         .btn-circle { width: 60px; height: 60px; border-radius: 50%; border: none; font-size: 1.5rem; cursor: pointer; }
         .btn-hangup { background: #ff0000; color: white; transform: rotate(135deg); }
         .btn-mic { background: #333; color: white; }
         .btn-mic.off { background: #ff4d00; }
-        #modal-chat { 
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); 
-            z-index: 100; padding: 20px; flex-direction: column; 
-        }
-        #chat-content { flex: 1; overflow-y: auto; background: #000; padding: 15px; border-radius: 15px; margin-bottom: 15px; }
-        .toast { 
-            position: fixed; top: 20px; background: #ff4d00; padding: 10px 20px; 
-            border-radius: 50px; font-weight: bold; display: none; 
-        }
+        #modal-chat { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; padding: 20px; flex-direction: column; }
+        #chat-content { flex: 1; overflow-y: auto; background: #000; padding: 15px; border-radius: 15px; margin-bottom: 15px; text-align: left; }
+        .toast { position: fixed; top: 20px; background: #ff4d00; padding: 10px 20px; border-radius: 50px; font-weight: bold; display: none; z-index: 200; }
     </style>
 </head>
 <body>
 
-    <div id="toast" class="toast">Link Copiado!</div>
+    <div id="toast" class="toast"></div>
 
     <div class="app-container">
+        <div id="lobby-extras">
+            <button class="btn-share-floating" onclick="shareLink()">🔗</button>
+            <span class="version-tag">v1.7</span>
+        </div>
+
         <h1>Call Base</h1>
 
         <div id="lobby">
             <input type="text" id="nick-input" placeholder="Seu Nome">
-            
             <div class="id-card" onclick="copyInviteLink()">
-                <small>Clique para copiar link de convite</small><br>
-                <strong id="my-id">Gerando...</strong>
+                <small style="color:#888">Clique para copiar convite</small><br>
+                <strong id="my-id">...</strong>
             </div>
-
-            <div id="qrcode"></div>
-
             <input type="text" id="peer-id-input" placeholder="ID do Amigo">
             <button class="btn-orange" onclick="startCall()">LIGAR AGORA 📞</button>
-            <button class="btn-share" onclick="shareLink()">COMPARTILHAR LINK 🔗</button>
         </div>
 
         <div id="call-screen" class="call-ui">
             <div style="font-size: 4rem; margin-bottom: 10px;">👤</div>
-            <h3 id="remote-nick-display">Chamada em curso</h3>
-            <p id="timer">00:00</p>
+            <h3 id="remote-nick-display">Conectando...</h3>
+            <p id="timer" style="color: #888; font-family: monospace;">00:00</p>
             
             <div class="controls-row">
                 <button class="btn-circle btn-mic" id="mic-btn" onclick="toggleMic()">🎙️</button>
@@ -92,13 +63,13 @@
 
     <div id="modal-chat">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3>Mensagens</h3>
+            <h3>Chat</h3>
             <button onclick="toggleChat(false)" style="background:none; border:none; color:white; font-size:2rem;">✕</button>
         </div>
         <div id="chat-content"></div>
         <div style="display: flex; gap: 5px;">
-            <input type="text" id="chat-input" placeholder="Mensagem...">
-            <button class="btn-orange" style="width: 80px;" onclick="sendMessage()">Ir</button>
+            <input type="text" id="chat-input" placeholder="Mensagem..." onkeypress="if(event.key==='Enter') sendMessage()">
+            <button class="btn-orange" style="width: 80px; margin:0;" onclick="sendMessage()">Ir</button>
         </div>
     </div>
 
@@ -106,7 +77,7 @@
 
     <script>
         const peer = new Peer();
-        let localStream, currentConn, currentCall, myNick = "User", seconds = 0;
+        let localStream, currentConn, myNick = "User", seconds = 0;
 
         const urlParams = new URLSearchParams(window.location.search);
         const joinId = urlParams.get('join');
@@ -114,11 +85,6 @@
 
         peer.on('open', id => {
             document.getElementById('my-id').innerText = id;
-            new QRCode(document.getElementById("qrcode"), {
-                text: window.location.origin + window.location.pathname + "?join=" + id,
-                width: 128, height: 128,
-                colorDark : "#000000", colorLight : "#ffffff"
-            });
         });
 
         function showToast(m) {
@@ -130,23 +96,25 @@
         function copyInviteLink() {
             const link = window.location.origin + window.location.pathname + "?join=" + peer.id;
             navigator.clipboard.writeText(link);
-            showToast("Link de Convite Copiado!");
+            showToast("Link Copiado!");
         }
 
         function shareLink() {
             const link = window.location.origin + window.location.pathname + "?join=" + peer.id;
             if (navigator.share) {
-                navigator.share({ title: 'Call Base', text: 'Entre na minha call!', url: link });
+                navigator.share({ title: 'Call Base', text: 'Entra na call!', url: link });
             } else { copyInviteLink(); }
         }
 
         async function startCall() {
             myNick = document.getElementById('nick-input').value || "User";
             const rId = document.getElementById('peer-id-input').value;
-            if(!rId) return alert("ID vazio");
-            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            handleCall(peer.call(rId, localStream));
-            setupConn(peer.connect(rId));
+            if(!rId) return showToast("Insira um ID!");
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                handleCall(peer.call(rId, localStream));
+                setupConn(peer.connect(rId));
+            } catch(e) { showToast("Erro no Microfone!"); }
         }
 
         peer.on('connection', setupConn);
@@ -161,6 +129,7 @@
             conn.on('open', () => {
                 conn.send({ type: 'nick', val: myNick });
                 document.getElementById('lobby').style.display = 'none';
+                document.getElementById('lobby-extras').style.display = 'none';
                 document.getElementById('call-screen').style.display = 'block';
                 setInterval(() => {
                     seconds++;
@@ -171,6 +140,7 @@
                 if(d.type === 'nick') document.getElementById('remote-nick-display').innerText = d.val;
                 if(d.type === 'msg') renderMsg(d.from, d.val);
             });
+            conn.on('close', () => location.reload());
         }
 
         function handleCall(call) {
@@ -184,6 +154,7 @@
             const t = localStream.getAudioTracks()[0];
             t.enabled = !t.enabled;
             document.getElementById('mic-btn').classList.toggle('off');
+            document.getElementById('mic-btn').innerText = t.enabled ? "🎙️" : "🔇";
         }
 
         function toggleChat(s) { document.getElementById('modal-chat').style.display = s ? 'flex' : 'none'; }
@@ -198,11 +169,13 @@
 
         function renderMsg(n, v) {
             const d = document.createElement('div');
-            d.innerHTML = `<b>${n}:</b> ${v}`;
+            d.style.marginBottom = "8px";
+            d.innerHTML = `<b style="color:#ff4d00">${n}:</b> ${v}`;
             document.getElementById('chat-content').appendChild(d);
+            document.getElementById('chat-content').scrollTop = document.getElementById('chat-content').scrollHeight;
         }
 
-        function endCall() { location.href = window.location.pathname; }
+        function endCall() { location.href = window.location.origin + window.location.pathname; }
     </script>
 </body>
 </html>
