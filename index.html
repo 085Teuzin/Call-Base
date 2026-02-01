@@ -3,101 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Discall - @085_Teuzinnn</title>
+    <title>Web Call - @085_Teuzinnn</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Roboto, sans-serif; height: 100vh; width: 100vw; overflow: hidden; position: fixed; }
+        body { background: #0a0f1a; color: #e2e8f0; font-family: 'Inter', system-ui, sans-serif; height: 100vh; width: 100vw; overflow: hidden; position: fixed; }
         
-        #lobby { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 20px; text-align: center; }
-        .logo { font-size: 3rem; font-weight: 800; margin-bottom: 2rem; background: linear-gradient(90deg, #f97316, #dc2626); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .input-group { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 15px; }
-        input { background: #1e293b; border: 1px solid #334155; padding: 15px; border-radius: 12px; color: white; outline: none; font-size: 1rem; }
-        input:focus { border-color: #f97316; }
-        #start-btn { background: #ea580c; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.3s; }
-        #start-btn:hover { background: #c2410c; }
-        .status-text { font-size: 0.8rem; color: #64748b; margin-top: 10px; }
+        #lobby { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 30px; }
+        .logo { font-size: 3.5rem; font-weight: 900; margin-bottom: 10px; color: #3b82f6; text-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+        .tagline { color: #64748b; margin-bottom: 40px; font-size: 0.9rem; }
+        .input-group { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 15px; }
+        input { background: #161e2d; border: 2px solid #1e293b; padding: 18px; border-radius: 16px; color: white; outline: none; font-size: 1rem; transition: 0.2s; }
+        input:focus { border-color: #3b82f6; background: #1c2636; }
+        #start-btn { background: #3b82f6; color: white; border: none; padding: 18px; border-radius: 16px; font-weight: 700; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+        #start-btn:active { transform: scale(0.98); }
 
-        #call-ui { display: none; flex-direction: column; height: 100%; width: 100%; padding: 40px 20px; justify-content: space-between; position: relative; }
-        .header { text-align: center; }
-        .avatar { width: 100px; height: 100px; background: #334155; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #94a3b8; border: 3px solid #f97316; }
-        #room-display { font-size: 1.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-        #timer { color: #94a3b8; font-variant-numeric: tabular-nums; margin-top: 5px; }
+        #call-ui { display: none; flex-direction: column; height: 100%; width: 100%; padding: 30px 20px; justify-content: space-between; position: relative; }
+        .call-header { text-align: center; z-index: 2; }
+        .avatar-container { position: relative; width: 120px; height: 120px; margin: 0 auto 20px; }
+        .avatar { width: 100%; height: 100%; background: #1e293b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; border: 4px solid #3b82f6; transition: 0.3s; }
+        .pulse { position: absolute; width: 100%; height: 100%; background: #3b82f6; border-radius: 50%; opacity: 0; z-index: -1; }
+        #room-display { font-size: 1.5rem; font-weight: 700; color: #f8fafc; }
+        #timer { color: #3b82f6; font-weight: 600; font-family: monospace; font-size: 1.1rem; }
 
-        .controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 400px; margin: 0 auto; width: 100%; }
-        .control-btn-wrapper { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 0.75rem; color: #94a3b8; }
-        .icon-circle { width: 65px; height: 65px; border-radius: 50%; background: #1e293b; border: none; color: white; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .icon-circle.active { background: white; color: black; }
-        .end-btn { background: #ef4444; width: 80px; height: 80px; border-radius: 50%; border: none; color: white; font-size: 2rem; cursor: pointer; margin: 20px auto 0; display: flex; align-items: center; justify-content: center; }
+        .controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 450px; margin: 0 auto; width: 100%; }
+        .control-item { display: flex; flex-direction: column; align-items: center; gap: 8px; color: #94a3b8; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+        .btn-circle { width: 60px; height: 60px; border-radius: 50%; background: #1e293b; border: 1px solid #334155; color: white; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn-circle.active { background: #f8fafc; color: #0a0f1a; border-color: white; }
+        .hangup { background: #ef4444; width: 75px; height: 75px; border-radius: 50%; border: none; color: white; font-size: 2rem; margin: 20px auto 0; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4); }
 
-        .popup { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 350px; background: #1e293b; border-radius: 20px; border: 1px solid #334155; z-index: 10; flex-direction: column; max-height: 60vh; }
-        .popup-header { padding: 15px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; font-weight: bold; }
-        #messages { flex: 1; overflow-y: auto; padding: 15px; font-size: 0.9rem; }
-        .chat-input-area { padding: 15px; display: flex; gap: 10px; }
-        .chat-input-area input { flex: 1; padding: 10px; font-size: 0.85rem; }
-        #user-list { padding: 15px; list-style: none; }
-        #user-list li { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; }
+        .popup { display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; height: 70%; background: #161e2d; border-radius: 24px; border: 1px solid #334155; z-index: 20; flex-direction: column; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); }
+        .p-head { padding: 20px; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; }
+        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { background: #1e293b; padding: 10px 15px; border-radius: 12px; max-width: 85%; align-self: flex-start; }
+        .msg.me { background: #3b82f6; align-self: flex-end; }
+        .chat-bar { padding: 20px; display: flex; gap: 10px; }
+        .chat-bar input { flex: 1; padding: 12px; border-radius: 12px; font-size: 0.9rem; }
+        
+        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #3b82f6; padding: 10px 20px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; display: none; z-index: 100; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
 
+    <div id="toast"></div>
+
     <div id="lobby">
-        <div class="logo">Discall</div>
+        <div class="logo">Web Call</div>
+        <div class="tagline">Comunicação simples e segura</div>
         <div class="input-group">
-            <input type="text" id="nick-input" placeholder="Seu Nickname">
-            <input type="text" id="room-input" placeholder="Nome da Sala">
-            <button id="start-btn">Conectar ⚡</button>
-            <p class="status-text" id="my-id-status">Aguardando microfone...</p>
+            <input type="text" id="nick-input" placeholder="Nickname">
+            <input type="text" id="room-input" placeholder="ID da Sala">
+            <button id="start-btn">Entrar agora ➔</button>
+            <p id="my-id-status" class="tagline" style="margin-top:20px">Conectando ao servidor...</p>
         </div>
     </div>
 
     <div id="call-ui">
-        <div class="header">
-            <div class="avatar">👤</div>
+        <div class="call-header">
+            <div class="avatar-container">
+                <div class="pulse" id="audio-pulse"></div>
+                <div class="avatar" id="main-avatar">👤</div>
+            </div>
             <div id="room-display">SALA</div>
             <div id="timer">00:00</div>
         </div>
 
         <div class="controls-grid">
-            <div class="control-btn-wrapper">
-                <button id="mute-btn" class="icon-circle">🎤</button>
-                <span>Mudo</span>
-            </div>
-            <div class="control-btn-wrapper">
-                <button id="speaker-btn" class="icon-circle">🔊</button>
-                <span>Viva-voz</span>
-            </div>
-            <div class="control-btn-wrapper">
-                <button id="chat-toggle" class="icon-circle">💬</button>
-                <span>Chat</span>
-            </div>
-            <div class="control-btn-wrapper">
-                <button id="users-btn" class="icon-circle">👥</button>
-                <span>Amigos</span>
-            </div>
+            <div class="control-item"><button id="mute-btn" class="btn-circle">🎤</button><span>Microfone</span></div>
+            <div class="control-item"><button id="speaker-btn" class="btn-circle">🔊</button><span>Viva-voz</span></div>
+            <div class="control-item"><button id="chat-toggle" class="btn-circle">💬</button><span>Mensagens</span></div>
+            <div class="control-item"><button id="users-btn" class="btn-circle">👥</button><span>Membros</span></div>
         </div>
 
-        <button class="end-btn" onclick="location.reload()">📞</button>
+        <button class="hangup" onclick="location.reload()">🔚</button>
     </div>
 
     <div id="chat-popup" class="popup">
-        <div class="popup-header"><span>Chat</span><span onclick="closePopups()" style="cursor:pointer">✕</span></div>
+        <div class="p-head"><b>Chat</b><span onclick="closePopups()">✕</span></div>
         <div id="messages"></div>
-        <div class="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Texto...">
-            <button id="send-msg" style="background:transparent; border:none; color:#ea580c; font-size:1.5rem">➤</button>
+        <div class="chat-bar">
+            <input type="text" id="chat-input" placeholder="Escreva algo...">
+            <button id="send-msg" style="background:none; border:none; font-size:1.5rem">🚀</button>
         </div>
     </div>
 
     <div id="users-popup" class="popup">
-        <div class="popup-header"><span>Na Sala</span><span onclick="closePopups()" style="cursor:pointer">✕</span></div>
-        <ul id="user-list"></ul>
+        <div class="p-head"><b>Membros na sala</b><span onclick="closePopups()">✕</span></div>
+        <div id="user-list" style="padding:20px"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, onDisconnect, onChildRemoved } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBq9-vsFpAgEtXJ--KH6knNKEpXXVgkGrc",
@@ -113,18 +110,19 @@
         const db = getDatabase(app);
         const peer = new Peer();
         let myStream, myNick, currentRoom, speakerMode = true;
-        const participants = new Set();
+        const participants = new Map();
         const connections = [];
 
         navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
             myStream = stream;
-            document.getElementById('my-id-status').innerText = "Sistema Pronto";
-        }).catch(() => alert("Ative o microfone!"));
+            document.getElementById('my-id-status').innerText = "Sistema Online";
+            setupVisualizer(stream);
+        }).catch(() => alert("Preciso do microfone para funcionar!"));
 
         document.getElementById('start-btn').onclick = () => {
             myNick = document.getElementById('nick-input').value;
             currentRoom = document.getElementById('room-input').value.trim().toLowerCase();
-            if(!myNick || !currentRoom || !myStream) return alert("Preencha os campos!");
+            if(!myNick || !currentRoom || !myStream) return;
 
             const roomRef = ref(db, 'rooms/' + currentRoom);
             const userRef = push(roomRef, { id: peer.id, nick: myNick });
@@ -132,18 +130,28 @@
 
             document.getElementById('lobby').style.display = 'none';
             document.getElementById('call-ui').style.display = 'flex';
-            document.getElementById('room-display').innerText = currentRoom;
-            participants.add(myNick + " (Você)");
+            document.getElementById('room-display').innerText = "#" + currentRoom;
+            document.getElementById('main-avatar').innerText = myNick.charAt(0).toUpperCase();
+            
             startTimer();
+            showToast("Você entrou na sala");
 
-            onChildAdded(roomRef, (snapshot) => {
-                const data = snapshot.val();
+            onChildAdded(roomRef, (snap) => {
+                const data = snap.val();
                 if(data.id !== peer.id) {
                     const call = peer.call(data.id, myStream, {metadata: {nick: myNick}});
                     handleCall(call);
                     const conn = peer.connect(data.id);
                     handleData(conn);
+                    participants.set(data.id, data.nick);
+                    showToast(`${data.nick} entrou`);
                 }
+            });
+
+            onChildRemoved(roomRef, (snap) => {
+                const data = snap.val();
+                showToast(`${data.nick} saiu`);
+                participants.delete(data.id);
             });
         };
 
@@ -157,12 +165,11 @@
         function handleCall(call) {
             call.on('stream', stream => {
                 if (!document.getElementById(call.peer)) {
-                    const audio = document.createElement('audio');
+                    const audio = new Audio();
                     audio.id = call.peer;
                     audio.srcObject = stream;
                     document.body.appendChild(audio);
                     audio.play();
-                    if(call.metadata && call.metadata.nick) participants.add(call.metadata.nick);
                 }
             });
         }
@@ -170,33 +177,55 @@
         function handleData(conn) {
             connections.push(conn);
             conn.on('data', data => {
-                if(data.type === 'chat') renderMsg(data.nick, data.msg);
+                if(data.type === 'chat') renderMsg(data.nick, data.msg, false);
             });
         }
 
-        document.getElementById('send-msg').onclick = () => {
-            const input = document.getElementById('chat-input');
-            if(input.value) {
-                connections.forEach(c => c.send({type: 'chat', nick: myNick, msg: input.value}));
-                renderMsg('Você', input.value);
-                input.value = '';
+        function setupVisualizer(stream) {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const source = ctx.createMediaStreamSource(stream);
+            const analyzer = ctx.createAnalyser();
+            source.connect(analyzer);
+            const data = new Uint8Array(analyzer.frequencyBinCount);
+            const p = document.getElementById('audio-pulse');
+            
+            function loop() {
+                analyzer.getByteFrequencyData(data);
+                let volume = data.reduce((a,b) => a+b) / data.length;
+                p.style.opacity = volume > 10 ? '0.4' : '0';
+                p.style.transform = `scale(${1 + volume/50})`;
+                requestAnimationFrame(loop);
             }
+            loop();
+        }
+
+        document.getElementById('send-msg').onclick = () => {
+            const i = document.getElementById('chat-input');
+            if(!i.value) return;
+            connections.forEach(c => c.send({type: 'chat', nick: myNick, msg: i.value}));
+            renderMsg('Você', i.value, true);
+            i.value = '';
         };
 
         document.getElementById('mute-btn').onclick = function() {
-            myStream.getAudioTracks()[0].enabled = !myStream.getAudioTracks()[0].enabled;
-            this.classList.toggle('active');
-            this.innerText = myStream.getAudioTracks()[0].enabled ? "🎤" : "🔇";
+            const active = myStream.getAudioTracks()[0].enabled = !myStream.getAudioTracks()[0].enabled;
+            this.classList.toggle('active', !active);
+            this.innerText = active ? "🎤" : "🔇";
         };
 
         document.getElementById('speaker-btn').onclick = function() {
             speakerMode = !speakerMode;
-            document.querySelectorAll('audio').forEach(audio => {
-                audio.volume = speakerMode ? 1.0 : 0.2;
-            });
-            this.classList.toggle('active');
+            document.querySelectorAll('audio').forEach(a => a.volume = speakerMode ? 1.0 : 0.2);
+            this.classList.toggle('active', !speakerMode);
             this.innerText = speakerMode ? "🔊" : "🔈";
         };
+
+        function showToast(txt) {
+            const t = document.getElementById('toast');
+            t.innerText = txt;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
+        }
 
         document.getElementById('chat-toggle').onclick = () => {
             closePopups();
@@ -205,31 +234,29 @@
 
         document.getElementById('users-btn').onclick = () => {
             closePopups();
-            const list = document.getElementById('user-list');
-            list.innerHTML = '';
-            participants.forEach(p => {
-                list.innerHTML += `<li><div class="dot"></div> ${p}</li>`;
-            });
+            const box = document.getElementById('user-list');
+            box.innerHTML = `<div style="margin-bottom:10px">🟢 ${myNick} (Você)</div>`;
+            participants.forEach(nick => box.innerHTML += `<div style="margin-bottom:10px">⚪ ${nick}</div>`);
             document.getElementById('users-popup').style.display = 'flex';
         };
 
-        window.closePopups = function() {
+        window.closePopups = () => {
             document.getElementById('chat-popup').style.display = 'none';
             document.getElementById('users-popup').style.display = 'none';
-        }
+        };
 
-        function renderMsg(nick, msg) {
+        function renderMsg(nick, msg, isMe) {
             const m = document.getElementById('messages');
-            m.innerHTML += `<div><b style="color:#ea580c">${nick}:</b> ${msg}</div>`;
+            m.innerHTML += `<div class="msg ${isMe?'me':''}"><b>${nick}</b><br>${msg}</div>`;
             m.scrollTop = m.scrollHeight;
         }
 
-        let s = 0;
         function startTimer() {
+            let s = 0;
             setInterval(() => {
                 s++;
-                let m = Math.floor(s/60), sec = s%60;
-                document.getElementById('timer').innerText = `${m < 10 ? '0'+m : m}:${sec < 10 ? '0'+sec : sec}`;
+                let min = Math.floor(s/60), sec = s%60;
+                document.getElementById('timer').innerText = `${min.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
             }, 1000);
         }
     </script>
