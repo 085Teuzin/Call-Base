@@ -2,71 +2,102 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Call - Made By: @085_Teuzinnn</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Discall - @085_Teuzinnn</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #1a222c; color: white; overflow: hidden; height: 100vh; display: flex; flex-direction: column; font-family: sans-serif; }
-        .lobby-container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
-        .call-screen { display: none; flex-direction: column; justify-content: space-between; height: 100vh; padding: 40px 20px; }
-        .avatar-circle { width: 80px; height: 80px; background-color: #313a4b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #7c86cc; float: right; }
-        .grid-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 50px; }
-        .control-item { display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 14px; }
-        .icon-btn { width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; border: none; transition: 0.2s; }
-        .icon-btn.active { background: white; color: black; }
-        .end-call { background: #ff3b30; width: 75px; height: 75px; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; }
-        .popup { display: none; position: fixed; top: 20%; left: 10%; right: 10%; bottom: 30%; background: #252f3f; border-radius: 20px; z-index: 100; flex-direction: column; border: 1px solid #3d4959; padding: 20px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Roboto, sans-serif; height: 100vh; width: 100vw; overflow: hidden; position: fixed; }
+        
+        #lobby { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 20px; text-align: center; }
+        .logo { font-size: 3rem; font-weight: 800; margin-bottom: 2rem; background: linear-gradient(90deg, #f97316, #dc2626); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .input-group { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 15px; }
+        input { background: #1e293b; border: 1px solid #334155; padding: 15px; border-radius: 12px; color: white; outline: none; font-size: 1rem; }
+        input:focus { border-color: #f97316; }
+        #start-btn { background: #ea580c; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.3s; }
+        #start-btn:hover { background: #c2410c; }
+        .status-text { font-size: 0.8rem; color: #64748b; margin-top: 10px; }
+
+        #call-ui { display: none; flex-direction: column; height: 100%; width: 100%; padding: 40px 20px; justify-content: space-between; position: relative; }
+        .header { text-align: center; }
+        .avatar { width: 100px; height: 100px; background: #334155; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #94a3b8; border: 3px solid #f97316; }
+        #room-display { font-size: 1.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        #timer { color: #94a3b8; font-variant-numeric: tabular-nums; margin-top: 5px; }
+
+        .controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 400px; margin: 0 auto; width: 100%; }
+        .control-btn-wrapper { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 0.75rem; color: #94a3b8; }
+        .icon-circle { width: 65px; height: 65px; border-radius: 50%; background: #1e293b; border: none; color: white; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .icon-circle.active { background: white; color: black; }
+        .end-btn { background: #ef4444; width: 80px; height: 80px; border-radius: 50%; border: none; color: white; font-size: 2rem; cursor: pointer; margin: 20px auto 0; display: flex; align-items: center; justify-content: center; }
+
+        .popup { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 350px; background: #1e293b; border-radius: 20px; border: 1px solid #334155; z-index: 10; flex-direction: column; max-height: 60vh; }
+        .popup-header { padding: 15px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; font-weight: bold; }
+        #messages { flex: 1; overflow-y: auto; padding: 15px; font-size: 0.9rem; }
+        .chat-input-area { padding: 15px; display: flex; gap: 10px; }
+        .chat-input-area input { flex: 1; padding: 10px; font-size: 0.85rem; }
+        #user-list { padding: 15px; list-style: none; }
+        #user-list li { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; }
     </style>
 </head>
 <body>
 
-    <div id="lobby" class="lobby-container">
-        <h1 class="text-4xl font-bold mb-8 bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">Web Call</h1>
-        <div class="w-full max-w-xs space-y-4">
-            <input type="text" id="nick-input" placeholder="Seu Nickname" class="w-full bg-gray-800 border border-gray-700 p-3 rounded-xl outline-none focus:border-orange-500">
-            <input type="text" id="room-input" placeholder="Nome da Sala" class="w-full bg-gray-800 border border-gray-700 p-3 rounded-xl outline-none focus:border-orange-500">
-            <button id="start-btn" class="w-full bg-orange-600 hover:bg-orange-700 py-3 rounded-xl font-bold transition">Entrar na Sala</button>
-            <p class="text-xs text-gray-500 text-center" id="my-id-status">Aguardando permissões...</p>
+    <div id="lobby">
+        <div class="logo">Discall</div>
+        <div class="input-group">
+            <input type="text" id="nick-input" placeholder="Seu Nickname">
+            <input type="text" id="room-input" placeholder="Nome da Sala">
+            <button id="start-btn">Conectar ⚡</button>
+            <p class="status-text" id="my-id-status">Aguardando microfone...</p>
         </div>
     </div>
 
-    <div id="call-ui" class="call-screen">
-        <div class="caller-info">
-            <div class="avatar-circle" id="avatar-letters">DS</div>
-            <h1 class="text-3xl font-medium" id="room-display">Discall</h1>
-            <p class="text-gray-400 text-lg" id="participant-name">Conectado</p>
-            <p class="text-gray-400" id="timer">00:00</p>
+    <div id="call-ui">
+        <div class="header">
+            <div class="avatar">👤</div>
+            <div id="room-display">SALA</div>
+            <div id="timer">00:00</div>
         </div>
 
-        <div class="grid-buttons">
-            <div class="control-item"><button id="mute-btn" class="icon-btn"><svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></button><span>Mudo</span></div>
-            <div class="control-item"><button id="chat-toggle" class="icon-btn"><svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></button><span>Chat</span></div>
-            <div class="control-item"><button id="users-btn" class="icon-btn"><svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></button><span>Amigos</span></div>
+        <div class="controls-grid">
+            <div class="control-btn-wrapper">
+                <button id="mute-btn" class="icon-circle">🎤</button>
+                <span>Mudo</span>
+            </div>
+            <div class="control-btn-wrapper">
+                <button id="speaker-btn" class="icon-circle">🔊</button>
+                <span>Viva-voz</span>
+            </div>
+            <div class="control-btn-wrapper">
+                <button id="chat-toggle" class="icon-circle">💬</button>
+                <span>Chat</span>
+            </div>
+            <div class="control-btn-wrapper">
+                <button id="users-btn" class="icon-circle">👥</button>
+                <span>Amigos</span>
+            </div>
         </div>
 
-        <button class="end-call" onclick="location.reload()">
-            <svg width="35" height="35" fill="white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" transform="rotate(135 12 12)"/></svg>
-        </button>
+        <button class="end-btn" onclick="location.reload()">📞</button>
     </div>
 
     <div id="chat-popup" class="popup">
-        <div class="flex justify-between border-b border-gray-600 pb-2 mb-2 font-bold"><span>Chat</span><button onclick="closePopups()">✕</button></div>
-        <div id="messages" class="flex-1 overflow-y-auto text-sm space-y-2 mb-2"></div>
-        <div class="flex gap-2">
-            <input type="text" id="chat-input" class="bg-gray-700 rounded-lg p-2 flex-1 outline-none text-sm" placeholder="Mensagem...">
-            <button id="send-msg" class="bg-orange-600 px-4 rounded-lg">↑</button>
+        <div class="popup-header"><span>Chat</span><span onclick="closePopups()" style="cursor:pointer">✕</span></div>
+        <div id="messages"></div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Texto...">
+            <button id="send-msg" style="background:transparent; border:none; color:#ea580c; font-size:1.5rem">➤</button>
         </div>
     </div>
 
     <div id="users-popup" class="popup">
-        <div class="flex justify-between border-b border-gray-600 pb-2 mb-4 font-bold"><span>Na Sala</span><button onclick="closePopups()">✕</button></div>
-        <ul id="user-list" class="space-y-3"></ul>
+        <div class="popup-header"><span>Na Sala</span><span onclick="closePopups()" style="cursor:pointer">✕</span></div>
+        <ul id="user-list"></ul>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, onDisconnect, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBq9-vsFpAgEtXJ--KH6knNKEpXXVgkGrc",
@@ -81,20 +112,19 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const peer = new Peer();
-        let myStream, myNick, currentRoom;
+        let myStream, myNick, currentRoom, speakerMode = true;
         const participants = new Set();
         const connections = [];
 
         navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
             myStream = stream;
-            document.getElementById('my-id-status').innerText = "Pronto";
-        }).catch(() => alert("Permita o microfone"));
+            document.getElementById('my-id-status').innerText = "Sistema Pronto";
+        }).catch(() => alert("Ative o microfone!"));
 
         document.getElementById('start-btn').onclick = () => {
             myNick = document.getElementById('nick-input').value;
             currentRoom = document.getElementById('room-input').value.trim().toLowerCase();
-            
-            if(!myNick || !currentRoom || !myStream) return alert("Preencha tudo!");
+            if(!myNick || !currentRoom || !myStream) return alert("Preencha os campos!");
 
             const roomRef = ref(db, 'rooms/' + currentRoom);
             const userRef = push(roomRef, { id: peer.id, nick: myNick });
@@ -102,8 +132,7 @@
 
             document.getElementById('lobby').style.display = 'none';
             document.getElementById('call-ui').style.display = 'flex';
-            document.getElementById('room-display').innerText = currentRoom.toUpperCase();
-            
+            document.getElementById('room-display').innerText = currentRoom;
             participants.add(myNick + " (Você)");
             startTimer();
 
@@ -123,9 +152,7 @@
             handleCall(call);
         });
 
-        peer.on('connection', conn => {
-            handleData(conn);
-        });
+        peer.on('connection', conn => handleData(conn));
 
         function handleCall(call) {
             call.on('stream', stream => {
@@ -159,6 +186,16 @@
         document.getElementById('mute-btn').onclick = function() {
             myStream.getAudioTracks()[0].enabled = !myStream.getAudioTracks()[0].enabled;
             this.classList.toggle('active');
+            this.innerText = myStream.getAudioTracks()[0].enabled ? "🎤" : "🔇";
+        };
+
+        document.getElementById('speaker-btn').onclick = function() {
+            speakerMode = !speakerMode;
+            document.querySelectorAll('audio').forEach(audio => {
+                audio.volume = speakerMode ? 1.0 : 0.2;
+            });
+            this.classList.toggle('active');
+            this.innerText = speakerMode ? "🔊" : "🔈";
         };
 
         document.getElementById('chat-toggle').onclick = () => {
@@ -171,7 +208,7 @@
             const list = document.getElementById('user-list');
             list.innerHTML = '';
             participants.forEach(p => {
-                list.innerHTML += `<li class="flex items-center gap-2"><div class="w-2 h-2 bg-green-500 rounded-full"></div> ${p}</li>`;
+                list.innerHTML += `<li><div class="dot"></div> ${p}</li>`;
             });
             document.getElementById('users-popup').style.display = 'flex';
         };
@@ -183,16 +220,16 @@
 
         function renderMsg(nick, msg) {
             const m = document.getElementById('messages');
-            m.innerHTML += `<div><b class="text-orange-400">${nick}:</b> ${msg}</div>`;
+            m.innerHTML += `<div><b style="color:#ea580c">${nick}:</b> ${msg}</div>`;
             m.scrollTop = m.scrollHeight;
         }
 
-        let seconds = 0;
+        let s = 0;
         function startTimer() {
             setInterval(() => {
-                seconds++;
-                let m = Math.floor(seconds/60), s = seconds%60;
-                document.getElementById('timer').innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+                s++;
+                let m = Math.floor(s/60), sec = s%60;
+                document.getElementById('timer').innerText = `${m < 10 ? '0'+m : m}:${sec < 10 ? '0'+sec : sec}`;
             }, 1000);
         }
     </script>
