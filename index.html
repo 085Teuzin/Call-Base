@@ -6,90 +6,234 @@
     <title>Web Call - @085_Teuzinnn</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
+        /* Reset e Travamento de Scroll */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: #0a0f1a; color: #e2e8f0; font-family: 'Inter', system-ui, sans-serif; height: 100vh; width: 100vw; overflow: hidden; position: fixed; }
         
-        #lobby { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 30px; }
-        .logo { font-size: 3.5rem; font-weight: 900; margin-bottom: 10px; color: #3b82f6; text-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
-        .tagline { color: #64748b; margin-bottom: 40px; font-size: 0.9rem; }
-        .input-group { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 15px; }
-        input { background: #161e2d; border: 2px solid #1e293b; padding: 18px; border-radius: 16px; color: white; outline: none; font-size: 1rem; transition: 0.2s; }
-        input:focus { border-color: #3b82f6; background: #1c2636; }
-        #start-btn { background: #3b82f6; color: white; border: none; padding: 18px; border-radius: 16px; font-weight: 700; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
-        #start-btn:active { transform: scale(0.98); }
+        html, body { 
+            height: 100%; 
+            width: 100%; 
+            overflow: hidden; 
+            position: fixed; 
+            background: #0a0f1a; 
+            color: #e2e8f0; 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
 
-        #call-ui { display: none; flex-direction: column; height: 100%; width: 100%; padding: 30px 20px; justify-content: space-between; position: relative; }
-        .call-header { text-align: center; z-index: 2; }
-        .avatar-container { position: relative; width: 120px; height: 120px; margin: 0 auto 20px; }
-        .avatar { width: 100%; height: 100%; background: #1e293b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; border: 4px solid #3b82f6; transition: 0.3s; }
+        /* Container Principal para garantir que nada saia da tela */
+        .app-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* LOBBY */
+        #lobby { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100%; 
+            padding: 20px; 
+            text-align: center;
+        }
+        .logo { font-size: clamp(2.5rem, 8vw, 3.5rem); font-weight: 900; color: #3b82f6; margin-bottom: 5px; }
+        .tagline { color: #64748b; margin-bottom: 30px; font-size: 0.85rem; padding: 0 10px; }
+        
+        .input-group { 
+            width: 100%; 
+            max-width: 320px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+        }
+        input { 
+            background: #161e2d; 
+            border: 2px solid #1e293b; 
+            padding: 16px; 
+            border-radius: 14px; 
+            color: white; 
+            outline: none; 
+            font-size: 1rem; 
+            width: 100%;
+        }
+        input:focus { border-color: #3b82f6; }
+        #start-btn { 
+            background: #3b82f6; 
+            color: white; 
+            border: none; 
+            padding: 16px; 
+            border-radius: 14px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            font-size: 1rem;
+            transition: transform 0.1s;
+        }
+        #start-btn:active { transform: scale(0.96); }
+
+        /* CALL UI */
+        #call-ui { 
+            display: none; 
+            flex-direction: column; 
+            height: 100%; 
+            width: 100%; 
+            padding: 20px; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+
+        .call-header { width: 100%; text-align: center; margin-top: 10px; }
+        .avatar-container { 
+            position: relative; 
+            width: clamp(80px, 25vw, 120px); 
+            height: clamp(80px, 25vw, 120px); 
+            margin: 0 auto 15px; 
+        }
+        .avatar { 
+            width: 100%; height: 100%; 
+            background: #1e293b; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 2.5rem; 
+            border: 3px solid #3b82f6; 
+        }
         .pulse { position: absolute; width: 100%; height: 100%; background: #3b82f6; border-radius: 50%; opacity: 0; z-index: -1; }
-        #room-display { font-size: 1.5rem; font-weight: 700; color: #f8fafc; }
-        #timer { color: #3b82f6; font-weight: 600; font-family: monospace; font-size: 1.1rem; }
+        #room-display { font-size: 1.2rem; font-weight: 700; opacity: 0.9; }
+        #timer { color: #3b82f6; font-family: monospace; font-size: 1rem; margin-top: 4px; }
 
-        .controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 450px; margin: 0 auto; width: 100%; }
-        .control-item { display: flex; flex-direction: column; align-items: center; gap: 8px; color: #94a3b8; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
-        .btn-circle { width: 60px; height: 60px; border-radius: 50%; background: #1e293b; border: 1px solid #334155; color: white; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .btn-circle.active { background: #f8fafc; color: #0a0f1a; border-color: white; }
-        .hangup { background: #ef4444; width: 75px; height: 75px; border-radius: 50%; border: none; color: white; font-size: 2rem; margin: 20px auto 0; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4); }
+        /* GRID DE CONTROLES - Otimizada para não vazar */
+        .controls-grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 10px; 
+            width: 100%; 
+            max-width: 400px; 
+            margin-bottom: 10px;
+        }
+        .control-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .btn-circle { 
+            width: clamp(50px, 14vw, 60px); 
+            height: clamp(50px, 14vw, 60px); 
+            border-radius: 50%; 
+            background: #1e293b; 
+            border: 1px solid #334155; 
+            color: white; 
+            font-size: 1.2rem; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .btn-circle.active { background: #f8fafc; color: #0a0f1a; }
+        .label-btn { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: #64748b; }
 
-        .popup { display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; height: 70%; background: #161e2d; border-radius: 24px; border: 1px solid #334155; z-index: 20; flex-direction: column; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); }
-        .p-head { padding: 20px; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; }
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { background: #1e293b; padding: 10px 15px; border-radius: 12px; max-width: 85%; align-self: flex-start; }
+        .hangup { 
+            background: #ef4444; 
+            width: 70px; height: 70px; 
+            border-radius: 50%; 
+            border: none; 
+            color: white; 
+            font-size: 1.8rem; 
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        /* POPUPS RECURSIVOS */
+        .popup { 
+            display: none; 
+            position: absolute; 
+            top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); 
+            width: 90%; 
+            height: 80%; 
+            background: #161e2d; 
+            border-radius: 24px; 
+            border: 1px solid #334155; 
+            z-index: 30; 
+            flex-direction: column; 
+            overflow: hidden;
+        }
+        .p-head { padding: 15px 20px; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; }
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .msg { background: #1e293b; padding: 10px; border-radius: 12px; font-size: 0.85rem; max-width: 85%; line-break: anywhere; }
         .msg.me { background: #3b82f6; align-self: flex-end; }
-        .chat-bar { padding: 20px; display: flex; gap: 10px; }
-        .chat-bar input { flex: 1; padding: 12px; border-radius: 12px; font-size: 0.9rem; }
         
-        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #3b82f6; padding: 10px 20px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; display: none; z-index: 100; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .chat-bar { padding: 15px; display: flex; gap: 8px; background: #111827; }
+        .chat-bar input { padding: 10px; border-radius: 10px; font-size: 0.85rem; }
+
+        #toast { 
+            position: fixed; top: 15px; left: 50%; transform: translateX(-50%); 
+            background: #3b82f6; padding: 8px 16px; border-radius: 30px; 
+            font-size: 0.75rem; font-weight: bold; display: none; z-index: 100; 
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
 
-    <div id="toast"></div>
+    <div class="app-container">
+        <div id="toast"></div>
 
-    <div id="lobby">
-        <div class="logo">Web Call</div>
-        <div class="tagline">Comunicação simples e segura</div>
-        <div class="input-group">
-            <input type="text" id="nick-input" placeholder="Nickname">
-            <input type="text" id="room-input" placeholder="ID da Sala">
-            <button id="start-btn">Entrar agora ➔</button>
-            <p id="my-id-status" class="tagline" style="margin-top:20px">Conectando ao servidor...</p>
-        </div>
-    </div>
-
-    <div id="call-ui">
-        <div class="call-header">
-            <div class="avatar-container">
-                <div class="pulse" id="audio-pulse"></div>
-                <div class="avatar" id="main-avatar">👤</div>
+        <div id="lobby">
+            <div class="logo">Web Call</div>
+            <div class="tagline">Conexão P2P Instantânea ⚡</div>
+            <div class="input-group">
+                <input type="text" id="nick-input" placeholder="Seu Nome">
+                <input type="text" id="room-input" placeholder="ID da Sala">
+                <button id="start-btn">Entrar na Chamada</button>
+                <p id="my-id-status" style="font-size: 0.7rem; color: #475569; margin-top: 10px;">Iniciando Peer...</p>
             </div>
-            <div id="room-display">SALA</div>
-            <div id="timer">00:00</div>
         </div>
 
-        <div class="controls-grid">
-            <div class="control-item"><button id="mute-btn" class="btn-circle">🎤</button><span>Microfone</span></div>
-            <div class="control-item"><button id="speaker-btn" class="btn-circle">🔊</button><span>Viva-voz</span></div>
-            <div class="control-item"><button id="chat-toggle" class="btn-circle">💬</button><span>Mensagens</span></div>
-            <div class="control-item"><button id="users-btn" class="btn-circle">👥</button><span>Membros</span></div>
+        <div id="call-ui">
+            <div class="call-header">
+                <div class="avatar-container">
+                    <div class="pulse" id="audio-pulse"></div>
+                    <div class="avatar" id="main-avatar">?</div>
+                </div>
+                <div id="room-display">SALA</div>
+                <div id="timer">00:00</div>
+            </div>
+
+            <div style="flex: 1;"></div> <div class="controls-grid">
+                <div class="control-item">
+                    <button id="mute-btn" class="btn-circle">🎤</button>
+                    <span class="label-btn">Mic</span>
+                </div>
+                <div class="control-item">
+                    <button id="speaker-btn" class="btn-circle">🔊</button>
+                    <span class="label-btn">Áudio</span>
+                </div>
+                <div class="control-item">
+                    <button id="chat-toggle" class="btn-circle">💬</button>
+                    <span class="label-btn">Chat</span>
+                </div>
+                <div class="control-item">
+                    <button id="users-btn" class="btn-circle">👥</button>
+                    <span class="label-btn">Geral</span>
+                </div>
+            </div>
+
+            <button class="hangup" onclick="location.reload()">📞</button>
         </div>
 
-        <button class="hangup" onclick="location.reload()">🔚</button>
-    </div>
-
-    <div id="chat-popup" class="popup">
-        <div class="p-head"><b>Chat</b><span onclick="closePopups()">✕</span></div>
-        <div id="messages"></div>
-        <div class="chat-bar">
-            <input type="text" id="chat-input" placeholder="Escreva algo...">
-            <button id="send-msg" style="background:none; border:none; font-size:1.5rem">🚀</button>
+        <div id="chat-popup" class="popup">
+            <div class="p-head"><b>Mensagens</b><span onclick="closePopups()" style="cursor:pointer; padding: 5px;">✕</span></div>
+            <div id="messages"></div>
+            <div class="chat-bar">
+                <input type="text" id="chat-input" placeholder="Mensagem...">
+                <button id="send-msg" style="background:none; border:none; font-size:1.2rem">▶️</button>
+            </div>
         </div>
-    </div>
 
-    <div id="users-popup" class="popup">
-        <div class="p-head"><b>Membros na sala</b><span onclick="closePopups()">✕</span></div>
-        <div id="user-list" style="padding:20px"></div>
+        <div id="users-popup" class="popup">
+            <div class="p-head"><b>Membros</b><span onclick="closePopups()" style="cursor:pointer; padding: 5px;">✕</span></div>
+            <div id="user-list" style="padding:20px; font-size: 0.9rem;"></div>
+        </div>
     </div>
 
     <script type="module">
@@ -113,16 +257,20 @@
         const participants = new Map();
         const connections = [];
 
+        // Inicia Áudio
         navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
             myStream = stream;
-            document.getElementById('my-id-status').innerText = "Sistema Online";
+            document.getElementById('my-id-status').innerText = "Pronto para conectar";
             setupVisualizer(stream);
-        }).catch(() => alert("Preciso do microfone para funcionar!"));
+        }).catch(() => {
+            document.getElementById('my-id-status').innerText = "Erro: Sem permissão de áudio";
+        });
 
+        // Entrar na Sala
         document.getElementById('start-btn').onclick = () => {
-            myNick = document.getElementById('nick-input').value;
+            myNick = document.getElementById('nick-input').value.trim();
             currentRoom = document.getElementById('room-input').value.trim().toLowerCase();
-            if(!myNick || !currentRoom || !myStream) return;
+            if(!myNick || !currentRoom || !myStream) return alert("Preencha os dados e aceite o microfone!");
 
             const roomRef = ref(db, 'rooms/' + currentRoom);
             const userRef = push(roomRef, { id: peer.id, nick: myNick });
@@ -182,21 +330,23 @@
         }
 
         function setupVisualizer(stream) {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const source = ctx.createMediaStreamSource(stream);
-            const analyzer = ctx.createAnalyser();
-            source.connect(analyzer);
-            const data = new Uint8Array(analyzer.frequencyBinCount);
-            const p = document.getElementById('audio-pulse');
-            
-            function loop() {
-                analyzer.getByteFrequencyData(data);
-                let volume = data.reduce((a,b) => a+b) / data.length;
-                p.style.opacity = volume > 10 ? '0.4' : '0';
-                p.style.transform = `scale(${1 + volume/50})`;
-                requestAnimationFrame(loop);
-            }
-            loop();
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const source = ctx.createMediaStreamSource(stream);
+                const analyzer = ctx.createAnalyser();
+                source.connect(analyzer);
+                const data = new Uint8Array(analyzer.frequencyBinCount);
+                const p = document.getElementById('audio-pulse');
+                
+                function loop() {
+                    analyzer.getByteFrequencyData(data);
+                    let vol = data.reduce((a,b) => a+b) / data.length;
+                    p.style.opacity = vol > 10 ? '0.4' : '0';
+                    p.style.transform = `scale(${1 + vol/40})`;
+                    requestAnimationFrame(loop);
+                }
+                loop();
+            } catch(e) {}
         }
 
         document.getElementById('send-msg').onclick = () => {
@@ -235,8 +385,8 @@
         document.getElementById('users-btn').onclick = () => {
             closePopups();
             const box = document.getElementById('user-list');
-            box.innerHTML = `<div style="margin-bottom:10px">🟢 ${myNick} (Você)</div>`;
-            participants.forEach(nick => box.innerHTML += `<div style="margin-bottom:10px">⚪ ${nick}</div>`);
+            box.innerHTML = `<div style="margin-bottom:12px">🔵 ${myNick} (Você)</div>`;
+            participants.forEach(nick => box.innerHTML += `<div style="margin-bottom:12px">⚪ ${nick}</div>`);
             document.getElementById('users-popup').style.display = 'flex';
         };
 
