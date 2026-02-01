@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discall - Made By: @085_Teuzinnn</title>
+    <title>Web Call - Made By: @085_Teuzinnn</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -22,19 +22,20 @@
 <body>
 
     <div id="lobby" class="lobby-container">
-        <h1 class="text-4xl font-bold mb-8 bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">Discall</h1>
+        <h1 class="text-4xl font-bold mb-8 bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">Web Call</h1>
         <div class="w-full max-w-xs space-y-4">
             <input type="text" id="nick-input" placeholder="Seu Nickname" class="w-full bg-gray-800 border border-gray-700 p-3 rounded-xl outline-none focus:border-orange-500">
-            <button id="start-btn" class="w-full bg-orange-600 hover:bg-orange-700 py-3 rounded-xl font-bold transition">Conectar</button>
-            <p class="text-xs text-gray-500 text-center" id="my-id-status">Conectando ao sistema...</p>
+            <input type="text" id="room-input" placeholder="Nome da Sala" class="w-full bg-gray-800 border border-gray-700 p-3 rounded-xl outline-none focus:border-orange-500">
+            <button id="start-btn" class="w-full bg-orange-600 hover:bg-orange-700 py-3 rounded-xl font-bold transition">Entrar na Sala</button>
+            <p class="text-xs text-gray-500 text-center" id="my-id-status">Aguardando permissões...</p>
         </div>
     </div>
 
     <div id="call-ui" class="call-screen">
         <div class="caller-info">
             <div class="avatar-circle" id="avatar-letters">DS</div>
-            <h1 class="text-3xl font-medium">Discall</h1>
-            <p class="text-gray-400 text-lg" id="participant-name">Em chamada</p>
+            <h1 class="text-3xl font-medium" id="room-display">Discall</h1>
+            <p class="text-gray-400 text-lg" id="participant-name">Conectado</p>
             <p class="text-gray-400" id="timer">00:00</p>
         </div>
 
@@ -65,7 +66,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, onDisconnect, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBq9-vsFpAgEtXJ--KH6knNKEpXXVgkGrc",
@@ -79,33 +80,30 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const roomRef = ref(db, 'main_room');
-
         const peer = new Peer();
-        let myStream, myNick, inCall = false;
+        let myStream, myNick, currentRoom;
         const participants = new Set();
         const connections = [];
 
         navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
             myStream = stream;
-            document.getElementById('my-id-status').innerText = "Pronto para conectar";
-        }).catch(() => {
-            alert("Erro no microfone");
-        });
+            document.getElementById('my-id-status').innerText = "Pronto";
+        }).catch(() => alert("Permita o microfone"));
 
         document.getElementById('start-btn').onclick = () => {
             myNick = document.getElementById('nick-input').value;
-            if(!myNick || !myStream) return alert("Digite seu nick!");
+            currentRoom = document.getElementById('room-input').value.trim().toLowerCase();
             
-            const userRegistration = push(roomRef, {
-                id: peer.id,
-                nick: myNick
-            });
-            onDisconnect(userRegistration).remove();
+            if(!myNick || !currentRoom || !myStream) return alert("Preencha tudo!");
 
-            lobby.style.display = 'none';
-            callUI.style.display = 'flex';
-            inCall = true;
+            const roomRef = ref(db, 'rooms/' + currentRoom);
+            const userRef = push(roomRef, { id: peer.id, nick: myNick });
+            onDisconnect(userRef).remove();
+
+            document.getElementById('lobby').style.display = 'none';
+            document.getElementById('call-ui').style.display = 'flex';
+            document.getElementById('room-display').innerText = currentRoom.toUpperCase();
+            
             participants.add(myNick + " (Você)");
             startTimer();
 
