@@ -7,94 +7,16 @@
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            background-color: #1a222c;
-            color: white;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            font-family: sans-serif;
-        }
-        .lobby-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .call-screen {
-            display: none;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 100vh;
-            padding: 40px 20px;
-        }
-        .avatar-circle {
-            width: 80px;
-            height: 80px;
-            background-color: #313a4b;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            color: #7c86cc;
-            float: right;
-        }
-        .grid-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
-            margin-bottom: 50px;
-        }
-        .control-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-        }
-        .icon-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            transition: 0.2s;
-        }
-        .icon-btn.active {
-            background: white;
-            color: black;
-        }
-        .end-call {
-            background: #ff3b30;
-            width: 75px;
-            height: 75px;
-            border-radius: 50%;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .popup {
-            display: none;
-            position: fixed;
-            top: 20%;
-            left: 10%;
-            right: 10%;
-            bottom: 30%;
-            background: #252f3f;
-            border-radius: 20px;
-            z-index: 100;
-            flex-direction: column;
-            border: 1px solid #3d4959;
-            padding: 20px;
-        }
+        body { background-color: #1a222c; color: white; overflow: hidden; height: 100vh; display: flex; flex-direction: column; font-family: sans-serif; }
+        .lobby-container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+        .call-screen { display: none; flex-direction: column; justify-content: space-between; height: 100vh; padding: 40px 20px; }
+        .avatar-circle { width: 80px; height: 80px; background-color: #313a4b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #7c86cc; float: right; }
+        .grid-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 50px; }
+        .control-item { display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 14px; }
+        .icon-btn { width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; border: none; transition: 0.2s; }
+        .icon-btn.active { background: white; color: black; }
+        .end-call { background: #ff3b30; width: 75px; height: 75px; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; }
+        .popup { display: none; position: fixed; top: 20%; left: 10%; right: 10%; bottom: 30%; background: #252f3f; border-radius: 20px; z-index: 100; flex-direction: column; border: 1px solid #3d4959; padding: 20px; }
     </style>
 </head>
 <body>
@@ -103,9 +25,8 @@
         <h1 class="text-4xl font-bold mb-8 bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">Discall</h1>
         <div class="w-full max-w-xs space-y-4">
             <input type="text" id="nick-input" placeholder="Seu Nickname" class="w-full bg-gray-800 border border-gray-700 p-3 rounded-xl outline-none focus:border-orange-500">
-            <input type="text" id="target-id-input" placeholder="ID da Sala (Para entrar)" class="w-full bg-gray-800 border border-gray-700 p-3 rounded-xl outline-none focus:border-orange-500">
-            <button id="start-btn" class="w-full bg-orange-600 hover:bg-orange-700 py-3 rounded-xl font-bold transition">Entrar na Sala</button>
-            <p class="text-xs text-gray-500 text-center" id="my-id-status">Gerando seu ID...</p>
+            <button id="start-btn" class="w-full bg-orange-600 hover:bg-orange-700 py-3 rounded-xl font-bold transition">Conectar</button>
+            <p class="text-xs text-gray-500 text-center" id="my-id-status">Conectando ao sistema...</p>
         </div>
     </div>
 
@@ -113,43 +34,14 @@
         <div class="caller-info">
             <div class="avatar-circle" id="avatar-letters">DS</div>
             <h1 class="text-3xl font-medium">Discall</h1>
-            <p class="text-gray-400 text-lg" id="participant-name">Conectado</p>
+            <p class="text-gray-400 text-lg" id="participant-name">Em chamada</p>
             <p class="text-gray-400" id="timer">00:00</p>
         </div>
 
         <div class="grid-buttons">
-            <div class="control-item">
-                <button id="mute-btn" class="icon-btn">
-                    <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-                </button>
-                <span>Deixar mudo</span>
-            </div>
-            <div class="control-item">
-                <button id="chat-toggle" class="icon-btn">
-                    <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-                </button>
-                <span>Chat</span>
-            </div>
-            <div class="control-item">
-                <button id="speaker-btn" class="icon-btn">
-                    <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-                </button>
-                <span>Caixa de som</span>
-            </div>
-            <div class="control-item">
-                <button id="users-btn" class="icon-btn">
-                    <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-                </button>
-                <span>Participantes</span>
-            </div>
-            <div class="control-item">
-                <div class="icon-btn opacity-20"><svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"/></svg></div>
-                <span>Minimizar</span>
-            </div>
-            <div class="control-item">
-                <div class="icon-btn opacity-20"><svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm7-7H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg></div>
-                <span>Teclado</span>
-            </div>
+            <div class="control-item"><button id="mute-btn" class="icon-btn"><svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></button><span>Mudo</span></div>
+            <div class="control-item"><button id="chat-toggle" class="icon-btn"><svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></button><span>Chat</span></div>
+            <div class="control-item"><button id="users-btn" class="icon-btn"><svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></button><span>Amigos</span></div>
         </div>
 
         <button class="end-call" onclick="location.reload()">
@@ -158,10 +50,7 @@
     </div>
 
     <div id="chat-popup" class="popup">
-        <div class="flex justify-between border-b border-gray-600 pb-2 mb-2 font-bold">
-            <span>Chat</span>
-            <button onclick="closePopups()">✕</button>
-        </div>
+        <div class="flex justify-between border-b border-gray-600 pb-2 mb-2 font-bold"><span>Chat</span><button onclick="closePopups()">✕</button></div>
         <div id="messages" class="flex-1 overflow-y-auto text-sm space-y-2 mb-2"></div>
         <div class="flex gap-2">
             <input type="text" id="chat-input" class="bg-gray-700 rounded-lg p-2 flex-1 outline-none text-sm" placeholder="Mensagem...">
@@ -170,91 +59,107 @@
     </div>
 
     <div id="users-popup" class="popup">
-        <div class="flex justify-between border-b border-gray-600 pb-2 mb-4 font-bold">
-            <span>Na Sala</span>
-            <button onclick="closePopups()">✕</button>
-        </div>
+        <div class="flex justify-between border-b border-gray-600 pb-2 mb-4 font-bold"><span>Na Sala</span><button onclick="closePopups()">✕</button></div>
         <ul id="user-list" class="space-y-3"></ul>
     </div>
 
-    <footer class="text-center pb-6 text-gray-500 text-sm">
-        Made By: <a href="https://instagram.com/085_Teuzinnn" target="_blank" class="text-blue-400 hover:text-blue-300 font-semibold transition duration-200">@085_Teuzinnn</a>
-    </footer>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, onChildAdded, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBq9-vsFpAgEtXJ--KH6knNKEpXXVgkGrc",
+            authDomain: "conexao-geral-teuzin.firebaseapp.com",
+            databaseURL: "https://conexao-geral-teuzin-default-rtdb.firebaseio.com",
+            projectId: "conexao-geral-teuzin",
+            storageBucket: "conexao-geral-teuzin.firebasestorage.app",
+            messagingSenderId: "153059359862",
+            appId: "1:153059359862:web:c9e69bbb151748cd8d7357"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const roomRef = ref(db, 'main_room');
+
         const peer = new Peer();
-        let myStream, conn, myNick, seconds = 0, inCall = false;
+        let myStream, myNick, inCall = false;
         const participants = new Set();
-
-        const lobby = document.getElementById('lobby');
-        const callUI = document.getElementById('call-ui');
-        const myIdStatus = document.getElementById('my-id-status');
+        const connections = [];
 
         navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
             myStream = stream;
+            document.getElementById('my-id-status').innerText = "Pronto para conectar";
         }).catch(() => {
-            alert("Acesso ao microfone é obrigatório para usar o Discall.");
-            location.reload();
+            alert("Erro no microfone");
         });
-
-        peer.on('open', id => { myIdStatus.innerText = "Seu ID: " + id; });
 
         document.getElementById('start-btn').onclick = () => {
             myNick = document.getElementById('nick-input').value;
-            const targetId = document.getElementById('target-id-input').value;
-            if(!myNick || !myStream) return alert("Digite seu nick e permita o microfone!");
+            if(!myNick || !myStream) return alert("Digite seu nick!");
             
-            if(targetId) {
-                const call = peer.call(targetId, myStream, {metadata: {nick: myNick}});
-                setupCall(call);
-                setupDataConn(peer.connect(targetId));
-            }
+            const userRegistration = push(roomRef, {
+                id: peer.id,
+                nick: myNick
+            });
+            onDisconnect(userRegistration).remove();
+
+            lobby.style.display = 'none';
+            callUI.style.display = 'flex';
+            inCall = true;
             participants.add(myNick + " (Você)");
-            checkCallStart();
+            startTimer();
+
+            onChildAdded(roomRef, (snapshot) => {
+                const data = snapshot.val();
+                if(data.id !== peer.id) {
+                    const call = peer.call(data.id, myStream, {metadata: {nick: myNick}});
+                    handleCall(call);
+                    const conn = peer.connect(data.id);
+                    handleData(conn);
+                }
+            });
         };
 
         peer.on('call', call => {
             call.answer(myStream);
-            setupCall(call);
+            handleCall(call);
         });
 
-        peer.on('connection', c => {
-            setupDataConn(c);
+        peer.on('connection', conn => {
+            handleData(conn);
         });
 
-        function setupCall(call) {
-            call.on('stream', userStream => {
-                const audio = document.createElement('audio');
-                audio.srcObject = userStream;
-                audio.play();
-                if(call.metadata && call.metadata.nick) participants.add(call.metadata.nick);
-                checkCallStart();
+        function handleCall(call) {
+            call.on('stream', stream => {
+                if (!document.getElementById(call.peer)) {
+                    const audio = document.createElement('audio');
+                    audio.id = call.peer;
+                    audio.srcObject = stream;
+                    document.body.appendChild(audio);
+                    audio.play();
+                    if(call.metadata && call.metadata.nick) participants.add(call.metadata.nick);
+                }
             });
         }
 
-        function setupDataConn(c) {
-            conn = c;
+        function handleData(conn) {
+            connections.push(conn);
             conn.on('data', data => {
                 if(data.type === 'chat') renderMsg(data.nick, data.msg);
             });
         }
 
-        function checkCallStart() {
-            if(participants.size >= 2 && !inCall) {
-                inCall = true;
-                lobby.style.display = 'none';
-                callUI.style.display = 'flex';
-                startTimer();
+        document.getElementById('send-msg').onclick = () => {
+            const input = document.getElementById('chat-input');
+            if(input.value) {
+                connections.forEach(c => c.send({type: 'chat', nick: myNick, msg: input.value}));
+                renderMsg('Você', input.value);
+                input.value = '';
             }
-        }
-
-        document.getElementById('mute-btn').onclick = function() {
-            const track = myStream.getAudioTracks()[0];
-            track.enabled = !track.enabled;
-            this.classList.toggle('active');
         };
 
-        document.getElementById('speaker-btn').onclick = function() {
+        document.getElementById('mute-btn').onclick = function() {
+            myStream.getAudioTracks()[0].enabled = !myStream.getAudioTracks()[0].enabled;
             this.classList.toggle('active');
         };
 
@@ -273,19 +178,10 @@
             document.getElementById('users-popup').style.display = 'flex';
         };
 
-        function closePopups() {
+        window.closePopups = function() {
             document.getElementById('chat-popup').style.display = 'none';
             document.getElementById('users-popup').style.display = 'none';
         }
-
-        document.getElementById('send-msg').onclick = () => {
-            const input = document.getElementById('chat-input');
-            if(input.value && conn) {
-                conn.send({type: 'chat', nick: myNick, msg: input.value});
-                renderMsg('Você', input.value);
-                input.value = '';
-            }
-        };
 
         function renderMsg(nick, msg) {
             const m = document.getElementById('messages');
@@ -293,6 +189,7 @@
             m.scrollTop = m.scrollHeight;
         }
 
+        let seconds = 0;
         function startTimer() {
             setInterval(() => {
                 seconds++;
