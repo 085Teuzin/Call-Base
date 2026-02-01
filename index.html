@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <title>Web Call - PWA</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: #0a0f1a; color: #e2e8f0; font-family: sans-serif; height: 100vh; overflow: hidden; position: fixed; width: 100%; }
+        
+        /* Layout simplificado e responsivo */
+        #lobby, #call-ui { display: flex; flex-direction: column; height: 100%; padding: 20px; align-items: center; justify-content: center; }
+        .input-group { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 10px; }
+        input { background: #161e2d; border: 2px solid #1e293b; padding: 15px; border-radius: 12px; color: white; outline: none; }
+        button { background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        
+        #call-ui { display: none; justify-content: space-between; }
+        .avatar { width: 100px; height: 100px; background: #1e293b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; border: 3px solid #3b82f6; position: relative; }
+        .pulse { position: absolute; width: 100%; height: 100%; background: #3b82f6; border-radius: 50%; opacity: 0; z-index: -1; }
+        
+        .controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 400px; }
+        .btn-c { width: 55px; height: 55px; border-radius: 50%; background: #1e293b; border: 1px solid #334155; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .btn-c.active { background: white; color: black; }
+        .hangup { background: #ef4444; width: 65px; height: 65px; border-radius: 50%; font-size: 1.5rem; margin-top: 10px; }
+
+        /* Popup Chat */
+        .popup { display: none; position: absolute; top: 10%; width: 90%; height: 80%; background: #161e2d; border-radius: 20px; z-index: 10; flex-direction: column; border: 1px solid #334155; }
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .msg { background: #1e293b; padding: 10px; border-radius: 10px; max-width: 80%; font-size: 0.9rem; }
+        .msg.me { background: #3b82f6; align-self: flex-end; }
+        .chat-bar { padding: 15px; display: flex; gap: 5px; }
+    </style>
+</head>
+<body>
+
+    <div id="lobby">
+        <h1 style="color:#3b82f6; margin-bottom:20px">Web Call</h1>
+        <div class="input-group">
+            <input type="text" id="nick-input" placeholder="Seu Nome">
+            <input type="text" id="room-input" placeholder="ID da Sala">
+            <button id="start-btn">ENTRAR</button>
+        </div>
+    </div>
+
+    <div id="call-ui">
+        <div style="text-align:center">
+            <div class="avatar"><div class="pulse" id="pulse"></div><span id="av-txt">?</span></div>
+            <h2 id="room-name" style="margin-top:10px">SALA</h2>
+            <div id="timer">00:00</div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-c" id="mute-btn">🎤</button>
+            <button class="btn-c" id="speaker-btn">🔊</button>
+            <button class="btn-c" id="chat-btn">💬</button>
+            <button class="btn-c" onclick="location.reload()">📞</button>
+        </div>
+    </div>
+
+    <div id="chat-popup" class="popup">
+        <div style="padding:15px; border-bottom:1px solid #334155; display:flex; justify-content:space-between">
+            <b>Chat</b> <span onclick="document.getElementById('chat-popup').style.display='none'">✕</span>
+        </div>
+        <div id="messages"></div>
+        <div class="chat-bar">
+            <input type="text" id="chat-input" style="flex:1" placeholder="Mensagem...">
+            <button id="send-btn">➔</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, onChildAdded, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // Registro do Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(() => console.log("SW ON"));
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBq9-vsFpAgEtXJ--KH6knNKEpXXVgkGrc",
+            authDomain: "conexao-geral-teuzin.firebaseapp.com",
+            databaseURL: "https://conexao-geral-teuzin-default-rtdb.firebaseio.com",
+            projectId: "conexao-geral-teuzin"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const peer = new Peer();
+        let myStream, myNick, connList = [];
+
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(s => {
+            myStream = s;
+            setupVisualizer(s);
+        });
+
+        document.getElementById('start-btn').onclick = () => {
+            myNick = document.getElementById('nick-input').value;
+            const room = document.getElementById('room-input').value.toLowerCase();
+            if(!myNick || !room) return;
+
+            document.getElementById('lobby').style.display = 'none';
+            document.getElementById('call-ui').style.display = 'flex';
+            document.getElementById('av-txt').innerText = myNick[0].toUpperCase();
+
+            const roomRef = ref(db, 'rooms/' + room);
+            push(roomRef, { id: peer.id, nick: myNick });
+
+            onChildAdded(roomRef, snap => {
+                const data = snap.val();
+                if(data.id !== peer.id) {
+                    const call = peer.call(data.id, myStream);
+                    const conn = peer.connect(data.id);
+                    setupConn(conn);
+                }
+            });
+        };
+
+        peer.on('call', call => {
+            call.answer(myStream);
+            call.on('stream', s => {
+                const audio = new Audio();
+                audio.srcObject = s;
+                audio.play();
+            });
+        });
+
+        peer.on('connection', setupConn);
+
+        function setupConn(conn) {
+            connList.push(conn);
+            conn.on('data', data => {
+                renderMsg(data.nick, data.msg, false);
+                // NOTIFICAÇÃO SE ESTIVER EM SEGUNDO PLANO
+                if (document.visibilityState !== 'visible') {
+                    showNotification(data.nick, data.msg);
+                }
+            });
+        }
+
+        function showNotification(user, text) {
+            if (Notification.permission === 'granted') {
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.showNotification(`Web Call: ${user}`, {
+                        body: text,
+                        icon: 'https://cdn-icons-png.flaticon.com/512/3616/3616215.png',
+                        actions: [{action: 'reply', type: 'text', title: 'Responder'}]
+                    });
+                });
+            } else {
+                Notification.requestPermission();
+            }
+        }
+
+        function renderMsg(n, m, isMe) {
+            const box = document.getElementById('messages');
+            box.innerHTML += `<div class="msg ${isMe?'me':''}"><b>${n}:</b><br>${m}</div>`;
+            box.scrollTop = box.scrollHeight;
+        }
+
+        document.getElementById('send-btn').onclick = () => {
+            const msg = document.getElementById('chat-input').value;
+            connList.forEach(c => c.send({nick: myNick, msg: msg}));
+            renderMsg('Você', msg, true);
+            document.getElementById('chat-input').value = '';
+        };
+
+        document.getElementById('chat-btn').onclick = () => {
+            document.getElementById('chat-popup').style.display = 'flex';
+        };
+
+        function setupVisualizer(stream) {
+            const ctx = new AudioContext();
+            const src = ctx.createMediaStreamSource(stream);
+            const ana = ctx.createAnalyser();
+            src.connect(ana);
+            const data = new Uint8Array(ana.frequencyBinCount);
+            function loop() {
+                ana.getByteFrequencyData(data);
+                let v = data.reduce((a,b)=>a+b)/data.length;
+                document.getElementById('pulse').style.opacity = v > 10 ? '0.5' : '0';
+                document.getElementById('pulse').style.transform = `scale(${1+v/50})`;
+                requestAnimationFrame(loop);
+            }
+            loop();
+        }
+    </script>
+</body>
+</html>
