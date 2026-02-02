@@ -5,82 +5,123 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f97316">
-    <title>Web Call - Made By: @085_Teuzinnn</title>
+    <title>Web Call - Pro P2P</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        body { background-color: #0f172a; color: #f1f5f9; overflow: hidden; position: fixed; width: 100vw; height: 100vh; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        body { background-color: #0f172a; color: #f1f5f9; overflow: hidden; position: fixed; width: 100vw; height: 100vh; font-family: system-ui, -apple-system, sans-serif; }
         .bg-orange-custom { background-color: #f97316; }
-        .border-orange-custom { border-color: #f97316; }
         .text-orange-custom { color: #f97316; }
-        .pulse { position: absolute; width: 100%; height: 100%; background: #f97316; border-radius: 50%; opacity: 0; z-index: -1; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .pulse { position: absolute; width: 100%; height: 100%; background: #f97316; border-radius: 50%; opacity: 0; z-index: -1; transition: transform 0.1s ease-out; }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        .btn-active { transform: scale(0.95); brightness: 1.1; }
+        .msg-bubble { word-wrap: break-word; overflow-wrap: break-word; }
+        .notif-badge { position: absolute; top: -2px; right: -2px; width: 12px; height: 12px; background: #ef4444; border-radius: 50%; display: none; border: 2px solid #0f172a; }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-4">
 
     <div id="lobby" class="w-full max-w-sm flex flex-col items-center animate-fade-in">
+        <div class="mb-6 relative">
+            <div class="w-20 h-20 bg-orange-custom rounded-3xl rotate-12 flex items-center justify-center shadow-lg shadow-orange-500/20">
+                <span class="text-4xl text-slate-900 -rotate-12">📞</span>
+            </div>
+        </div>
         <h1 class="text-4xl font-black text-orange-custom mb-2">Web Call</h1>
-        <p class="text-slate-400 mb-8 text-center">Comunicação P2P Segura</p>
+        <p class="text-slate-400 mb-8 text-center px-4 text-sm leading-relaxed">Comunicação P2P Segura & Alta Fidelidade</p>
         
-        <div class="w-full space-y-4">
-            <input type="text" id="nick-input" placeholder="Seu apelido" class="w-full bg-slate-800 border-2 border-slate-700 p-4 rounded-2xl focus:border-orange-custom outline-none transition-all">
-            <input type="text" id="room-input" placeholder="ID da Sala" class="w-full bg-slate-800 border-2 border-slate-700 p-4 rounded-2xl focus:border-orange-custom outline-none transition-all">
-            <button id="start-btn" class="w-full bg-orange-custom text-slate-900 font-bold p-4 rounded-2xl hover:brightness-110 active:scale-95 transition-all">ENTRAR NA CHAMADA</button>
+        <div class="w-full space-y-3">
+            <div class="relative">
+                <input type="text" id="nick-input" maxlength="15" placeholder="Seu apelido" class="w-full bg-slate-800/50 border-2 border-slate-700 p-4 rounded-2xl focus:border-orange-custom outline-none transition-all placeholder:text-slate-500">
+            </div>
+            <div class="relative">
+                <input type="text" id="room-input" maxlength="20" placeholder="ID da Sala" class="w-full bg-slate-800/50 border-2 border-slate-700 p-4 rounded-2xl focus:border-orange-custom outline-none transition-all placeholder:text-slate-500">
+            </div>
+            <button id="start-btn" class="w-full bg-orange-custom text-slate-900 font-bold p-4 rounded-2xl hover:shadow-lg hover:shadow-orange-500/30 active:scale-[0.98] transition-all uppercase tracking-wider">ENTRAR NA CHAMADA</button>
         </div>
 
-        <footer class="text-center mt-5 text-gray-500 text-sm">
-            Made By: <a href="https://instagram.com/085_Teuzinnn" target="_blank" class="text-blue-400 hover:text-blue-300 font-semibold transition duration-200">@085_Teuzinnn</a>
+        <footer class="text-center mt-8 text-slate-500 text-xs">
+            Desenvolvido por <a href="https://instagram.com/085_Teuzinnn" target="_blank" class="text-orange-custom/80 hover:text-orange-custom font-bold transition-colors">@085_Teuzinnn</a>
         </footer>
     </div>
 
-    <div id="call-ui" class="hidden w-full h-full flex flex-col items-center justify-between py-10">
+    <div id="call-ui" class="hidden w-full h-full flex flex-col items-center justify-between py-8 animate-fade-in">
+        <div class="w-full px-6 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Live</span>
+            </div>
+            <div id="display-room" class="bg-slate-800 px-4 py-1 rounded-full text-xs font-bold text-orange-custom">#SALA</div>
+        </div>
+
         <div class="text-center">
-            <div class="relative w-32 h-32 mx-auto flex items-center justify-center bg-slate-800 rounded-full border-4 border-orange-custom">
+            <div class="relative w-40 h-40 mx-auto flex items-center justify-center bg-slate-800 rounded-full border-4 border-slate-700 shadow-2xl">
                 <div id="pulse" class="pulse"></div>
-                <span id="av-txt" class="text-5xl font-bold">?</span>
+                <div id="avatar-bg" class="w-full h-full rounded-full flex items-center justify-center transition-colors duration-500">
+                    <span id="av-txt" class="text-6xl font-black text-white">?</span>
+                </div>
             </div>
-            <h2 id="display-room" class="mt-4 text-xl font-bold tracking-widest text-slate-300">#SALA</h2>
-            <div id="timer" class="text-orange-custom font-mono text-lg font-bold">00:00</div>
+            <div id="timer" class="mt-6 text-white font-mono text-2xl font-light tracking-tighter">00:00</div>
+            <p id="status-info" class="text-slate-500 text-xs mt-1 uppercase tracking-widest">Conectado</p>
         </div>
 
-        <div class="grid grid-cols-5 gap-3 w-full max-w-md px-4">
-            <button class="flex items-center justify-center w-full aspect-square bg-orange-custom text-slate-900 rounded-2xl text-xl transition-all" id="mute-btn">🎤</button>
-            <button class="flex items-center justify-center w-full aspect-square bg-orange-custom text-slate-900 rounded-2xl text-xl transition-all" id="speaker-btn">🔊</button>
-            <button class="flex items-center justify-center w-full aspect-square bg-slate-800 text-white rounded-2xl text-xl transition-all" id="users-btn">👥</button>
-            <button class="flex items-center justify-center w-full aspect-square bg-slate-800 text-white rounded-2xl text-xl transition-all" id="chat-btn">💬</button>
-            <button class="flex items-center justify-center w-full aspect-square bg-red-500 text-white rounded-2xl text-xl" onclick="location.reload()">📞</button>
+        <div class="grid grid-cols-5 gap-4 w-full max-w-md px-6">
+            <button class="group flex flex-col items-center gap-2" id="mute-btn">
+                <div class="w-full aspect-square bg-slate-800 group-active:scale-90 text-white rounded-2xl flex items-center justify-center text-xl transition-all border-b-4 border-slate-900">🎤</div>
+            </button>
+            <button class="group flex flex-col items-center gap-2" id="speaker-btn">
+                <div class="w-full aspect-square bg-slate-800 group-active:scale-90 text-white rounded-2xl flex items-center justify-center text-xl transition-all border-b-4 border-slate-900">🔊</div>
+            </button>
+            <button class="group flex flex-col items-center gap-2 relative" id="users-btn">
+                <div class="w-full aspect-square bg-slate-800 group-active:scale-90 text-white rounded-2xl flex items-center justify-center text-xl transition-all border-b-4 border-slate-900">👥</div>
+            </button>
+            <button class="group flex flex-col items-center gap-2 relative" id="chat-btn">
+                <div id="chat-notif" class="notif-badge"></div>
+                <div class="w-full aspect-square bg-slate-800 group-active:scale-90 text-white rounded-2xl flex items-center justify-center text-xl transition-all border-b-4 border-slate-900">💬</div>
+            </button>
+            <button class="group flex flex-col items-center gap-2" onclick="location.reload()">
+                <div class="w-full aspect-square bg-red-500 group-active:scale-90 text-white rounded-2xl flex items-center justify-center text-xl border-b-4 border-red-700">📞</div>
+            </button>
         </div>
     </div>
 
-    <div id="chat-popup" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-md h-[70vh] rounded-3xl flex flex-col shadow-2xl">
-            <div class="p-5 border-b border-slate-700 flex justify-between items-center">
-                <b class="text-orange-custom">Chat da Sala</b>
-                <button onclick="closePopups()" class="text-slate-400 p-2">✕</button>
+    <div id="chat-popup" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 glass">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-md h-[80vh] rounded-[2.5rem] flex flex-col shadow-2xl overflow-hidden animate-fade-in">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+                <div>
+                    <h3 class="font-bold text-white">Chat da Sala</h3>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-widest">Mensagens P2P</p>
+                </div>
+                <button onclick="closePopups()" class="bg-slate-800 hover:bg-slate-700 text-slate-400 w-8 h-8 rounded-full flex items-center justify-center transition-all">✕</button>
             </div>
-            <div id="messages" class="flex-1 overflow-y-auto p-5 space-y-4"></div>
-            <div class="p-4 bg-slate-800/50 flex gap-2 rounded-b-3xl">
-                <input type="text" id="chat-input" class="flex-1 bg-slate-800 border border-slate-700 p-3 rounded-xl outline-none focus:border-orange-custom" placeholder="Sua mensagem...">
-                <button id="send-btn" class="bg-orange-custom text-slate-900 px-5 rounded-xl font-bold">➔</button>
+            <div id="messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-900/30"></div>
+            <div class="p-4 bg-slate-800/50 flex gap-2">
+                <input type="text" id="chat-input" class="flex-1 bg-slate-900 border border-slate-700 p-4 rounded-2xl outline-none focus:border-orange-custom transition-all text-sm" placeholder="Digite algo...">
+                <button id="send-btn" class="bg-orange-custom text-slate-900 w-12 rounded-2xl flex items-center justify-center hover:brightness-110 active:scale-95 transition-all">➔</button>
             </div>
         </div>
     </div>
 
-    <div id="users-popup" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-md h-[60vh] rounded-3xl flex flex-col shadow-2xl">
-            <div class="p-5 border-b border-slate-700 flex justify-between items-center">
-                <b class="text-orange-custom">Participantes</b>
-                <button onclick="closePopups()" class="text-slate-400 p-2">✕</button>
+    <div id="users-popup" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 glass">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-md h-[60vh] rounded-[2.5rem] flex flex-col shadow-2xl overflow-hidden animate-fade-in">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+                <div>
+                    <h3 class="font-bold text-white">Participantes</h3>
+                    <p id="user-count" class="text-[10px] text-orange-custom uppercase tracking-widest">1 ONLINE</p>
+                </div>
+                <button onclick="closePopups()" class="bg-slate-800 hover:bg-slate-700 text-slate-400 w-8 h-8 rounded-full flex items-center justify-center transition-all">✕</button>
             </div>
-            <ul id="user-list" class="p-5 space-y-3"></ul>
+            <ul id="user-list" class="p-6 space-y-3 overflow-y-auto"></ul>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBq9-vsFpAgEtXJ--KH6knNKEpXXVgkGrc",
@@ -88,33 +129,55 @@
             databaseURL: "https://conexao-geral-teuzin-default-rtdb.firebaseio.com",
             projectId: "conexao-geral-teuzin"
         };
+
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const peer = new Peer({ config: {'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] }});
+        const peer = new Peer({ 
+            config: { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }, { 'urls': 'stun:stun1.l.google.com:19302' }] },
+            debug: 1
+        });
 
-        let myStream, myNick, currentRoom;
+        let myStream, myNick, currentRoom, isMuted = false, isSpeakerOff = false;
         let connections = {};
         let participants = {};
+        const colors = ['#f97316', '#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'];
+        const myColor = colors[Math.floor(Math.random() * colors.length)];
 
-        navigator.mediaDevices.getUserMedia({ audio: true }).then(s => { myStream = s; setupVisualizer(s); });
+        const constraints = { 
+            audio: { 
+                echoCancellation: true, 
+                noiseSuppression: true, 
+                autoGainControl: true 
+            } 
+        };
+
+        navigator.mediaDevices.getUserMedia(constraints).then(s => { 
+            myStream = s; 
+            setupVisualizer(s, 'pulse'); 
+        }).catch(e => alert("Erro ao acessar microfone. Verifique as permissões."));
 
         document.getElementById('start-btn').onclick = () => {
             myNick = document.getElementById('nick-input').value.trim();
-            currentRoom = document.getElementById('room-input').value.trim().toLowerCase();
-            if(!myNick || !currentRoom) return;
+            currentRoom = document.getElementById('room-input').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+            
+            if(!myNick || !currentRoom) return alert("Preencha seu apelido e a sala!");
+            
             document.getElementById('lobby').classList.add('hidden');
             document.getElementById('call-ui').classList.remove('hidden');
             document.getElementById('av-txt').innerText = myNick[0].toUpperCase();
+            document.getElementById('avatar-bg').style.backgroundColor = myColor;
             document.getElementById('display-room').innerText = "#" + currentRoom;
+            
             const roomRef = ref(db, 'rooms/' + currentRoom);
-            push(roomRef, { id: peer.id, nick: myNick });
+            push(roomRef, { id: peer.id, nick: myNick, color: myColor });
+
             onChildAdded(roomRef, snap => {
                 const user = snap.val();
-                if(user.id !== peer.id) {
+                if(user.id !== peer.id && !participants[user.id]) {
                     connectToUser(user.id, user.nick);
-                    systemMsg(`${user.nick} entrou na sala`);
+                    systemMsg(`${user.nick} entrou na conversa`);
                 }
-                participants[user.id] = user.nick;
+                participants[user.id] = user;
                 updateUserList();
             });
             startTimer();
@@ -123,9 +186,10 @@
         function connectToUser(userId, nick) {
             const call = peer.call(userId, myStream);
             const conn = peer.connect(userId);
-            setupDataConn(conn, nick);
+            if(conn) setupDataConn(conn, nick);
+            
             call.on('stream', s => playStream(s, userId));
-            call.on('close', () => { if(participants[userId]) setTimeout(() => connectToUser(userId, nick), 2000); });
+            call.on('error', () => setTimeout(() => connectToUser(userId, nick), 3000));
         }
 
         peer.on('call', call => {
@@ -133,57 +197,89 @@
             call.on('stream', s => playStream(s, call.peer));
         });
 
-        peer.on('connection', conn => setupDataConn(conn, "Amigo"));
+        peer.on('connection', conn => {
+            setupDataConn(conn, "Usuário");
+        });
 
         function setupDataConn(conn, nick) {
             connections[conn.peer] = conn;
             conn.on('data', data => {
-                if(data.type === 'chat') renderMsg(data.nick, data.msg, false, data.time);
+                if(data.type === 'chat') {
+                    renderMsg(data.nick, data.msg, false, data.time);
+                    if(document.getElementById('chat-popup').classList.contains('hidden')) {
+                        document.getElementById('chat-notif').style.display = 'block';
+                    }
+                }
                 else if(data.type === 'system') systemMsg(`${data.nick} ${data.action}`);
             });
+            conn.on('close', () => delete connections[conn.peer]);
         }
 
         function playStream(stream, id) {
-            if(document.getElementById('audio-'+id)) return;
-            const audio = new Audio(); audio.id = 'audio-'+id; audio.srcObject = stream; audio.play();
+            let audio = document.getElementById('audio-'+id);
+            if(!audio) {
+                audio = new Audio();
+                audio.id = 'audio-'+id;
+                document.body.appendChild(audio);
+            }
+            audio.srcObject = stream;
+            audio.play().catch(e => console.log("Autoplay bloqueado"));
         }
 
         function renderMsg(nick, msg, isMe, time) {
             const box = document.getElementById('messages');
             const now = time || new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const cleanMsg = msg.replace(/</g, "&lt;").replace(/>/g, "&gt;");
             const align = isMe ? 'ml-auto bg-orange-custom text-slate-900' : 'mr-auto bg-slate-800 text-white';
-            box.innerHTML += `<div class="max-w-[85%] p-3 rounded-2xl ${align} shadow-lg"><div class="flex justify-between gap-4 text-[10px] mb-1 font-bold uppercase opacity-70"><span>${nick}</span><span>${now}</span></div><div class="text-sm">${msg}</div></div>`;
+            const radius = isMe ? 'rounded-2xl rounded-tr-none' : 'rounded-2xl rounded-tl-none';
+            
+            box.innerHTML += `
+                <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-fade-in">
+                    <div class="max-w-[85%] p-3 shadow-md msg-bubble ${align} ${radius}">
+                        <div class="flex justify-between gap-4 text-[9px] mb-1 font-black uppercase opacity-60">
+                            <span>${nick}</span>
+                            <span>${now}</span>
+                        </div>
+                        <div class="text-sm leading-relaxed">${cleanMsg}</div>
+                    </div>
+                </div>`;
             box.scrollTop = box.scrollHeight;
         }
 
         function systemMsg(text) {
-            document.getElementById('messages').innerHTML += `<div class="w-full text-center text-[10px] text-slate-500 italic py-1">SISTEMA: ${text}</div>`;
+            const box = document.getElementById('messages');
+            box.innerHTML += `<div class="w-full text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest py-2">⚡ ${text}</div>`;
+            box.scrollTop = box.scrollHeight;
         }
 
-        document.getElementById('send-btn').onclick = () => {
+        document.getElementById('send-btn').onclick = sendMessage;
+        document.getElementById('chat-input').onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+
+        function sendMessage() {
             const input = document.getElementById('chat-input');
             const msg = input.value.trim();
             if(!msg) return;
             const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            Object.values(connections).forEach(c => { if(c.open) c.send({ type: 'chat', nick: myNick, msg: msg, time: time }); });
+            Object.values(connections).forEach(c => { 
+                if(c.open) c.send({ type: 'chat', nick: myNick, msg: msg, time: time }); 
+            });
             renderMsg('Você', msg, true, time);
             input.value = '';
-        };
+        }
 
         document.getElementById('mute-btn').onclick = function() {
-            const t = myStream.getAudioTracks()[0]; t.enabled = !t.enabled;
-            this.className = t.enabled ? 'flex items-center justify-center w-full aspect-square bg-orange-custom text-slate-900 rounded-2xl text-xl transition-all' : 'flex items-center justify-center w-full aspect-square bg-white text-slate-900 rounded-2xl text-xl transition-all';
-            this.innerText = t.enabled ? '🎤' : '🔇';
-            broadcastSystem(t.enabled ? "desmutou" : "mutou o microfone");
+            isMuted = !isMuted;
+            myStream.getAudioTracks()[0].enabled = !isMuted;
+            this.querySelector('div').className = !isMuted ? 'w-full aspect-square bg-slate-800 text-white rounded-2xl flex items-center justify-center text-xl transition-all border-b-4 border-slate-900' : 'w-full aspect-square bg-white text-slate-900 rounded-2xl flex items-center justify-center text-xl transition-all border-b-4 border-slate-300';
+            this.querySelector('div').innerText = !isMuted ? '🎤' : '🔇';
+            broadcastSystem(isMuted ? "mutou o microfone" : "ativou o microfone");
         };
 
         document.getElementById('speaker-btn').onclick = function() {
-            const audios = document.querySelectorAll('audio');
-            const isActive = this.classList.contains('bg-orange-custom');
-            audios.forEach(a => a.muted = isActive);
-            this.className = !isActive ? 'flex items-center justify-center w-full aspect-square bg-orange-custom text-slate-900 rounded-2xl text-xl transition-all' : 'flex items-center justify-center w-full aspect-square bg-white text-slate-900 rounded-2xl text-xl transition-all';
-            this.innerText = !isActive ? '🔊' : '🔈';
-            broadcastSystem(!isActive ? "ativou o áudio" : "desligou o áudio");
+            isSpeakerOff = !isSpeakerOff;
+            document.querySelectorAll('audio').forEach(a => a.muted = isSpeakerOff);
+            this.querySelector('div').className = !isSpeakerOff ? 'w-full aspect-square bg-slate-800 text-white rounded-2xl flex items-center justify-center text-xl transition-all border-b-4 border-slate-900' : 'w-full aspect-square bg-white text-slate-900 rounded-2xl flex items-center justify-center text-xl transition-all border-b-4 border-slate-300';
+            this.querySelector('div').innerText = !isSpeakerOff ? '🔊' : '🔈';
         };
 
         function broadcastSystem(action) {
@@ -191,31 +287,76 @@
             Object.values(connections).forEach(c => { if(c.open) c.send({ type: 'system', nick: myNick, action: action }); });
         }
 
-        document.getElementById('chat-btn').onclick = () => document.getElementById('chat-popup').classList.remove('hidden');
-        document.getElementById('users-btn').onclick = () => { updateUserList(); document.getElementById('users-popup').classList.remove('hidden'); };
+        document.getElementById('chat-btn').onclick = () => {
+            document.getElementById('chat-popup').classList.remove('hidden');
+            document.getElementById('chat-notif').style.display = 'none';
+        };
+        
+        document.getElementById('users-btn').onclick = () => { 
+            updateUserList(); 
+            document.getElementById('users-popup').classList.remove('hidden'); 
+        };
+
         window.closePopups = () => { document.querySelectorAll('.fixed').forEach(p => p.classList.add('hidden')); };
 
         function updateUserList() {
             const l = document.getElementById('user-list');
-            l.innerHTML = `<li class="flex items-center gap-3 bg-slate-800 p-4 rounded-xl"><div class="w-2 h-2 rounded-full bg-orange-custom"></div> ${myNick} (Você)</li>`;
-            Object.entries(participants).forEach(([id, n]) => { if(id !== peer.id) l.innerHTML += `<li class="flex items-center gap-3 bg-slate-800 p-4 rounded-xl"><div class="w-2 h-2 rounded-full bg-orange-custom"></div> ${n}</li>`; });
+            const count = Object.keys(participants).length;
+            document.getElementById('user-count').innerText = `${count} ONLINE`;
+            l.innerHTML = '';
+            Object.values(participants).forEach(u => {
+                const isMe = u.id === peer.id;
+                l.innerHTML += `
+                    <li class="flex items-center justify-between bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shadow-inner" style="background-color: ${u.color}">
+                                ${u.nick[0].toUpperCase()}
+                            </div>
+                            <span class="font-medium ${isMe ? 'text-orange-custom' : 'text-slate-200'}">${u.nick} ${isMe ? '(Você)' : ''}</span>
+                        </div>
+                        <div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#10b981]"></div>
+                    </li>`;
+            });
         }
 
-        function setupVisualizer(s) {
-            const ctx = new AudioContext(); const ana = ctx.createAnalyser(); ctx.createMediaStreamSource(s).connect(ana);
-            const d = new Uint8Array(ana.frequencyBinCount);
-            function loop() {
-                ana.getByteFrequencyData(d); let v = d.reduce((a,b)=>a+b)/d.length;
-                document.getElementById('pulse').style.opacity = v > 15 ? '0.4' : '0';
-                document.getElementById('pulse').style.transform = `scale(${1+v/45})`;
-                requestAnimationFrame(loop);
+        function setupVisualizer(stream, elementId) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const analyser = audioContext.createAnalyser();
+            const source = audioContext.createMediaStreamSource(stream);
+            source.connect(analyser);
+            analyser.fftSize = 64;
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+            function draw() {
+                analyser.getByteFrequencyData(dataArray);
+                let sum = 0;
+                for(let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+                let average = sum / dataArray.length;
+                let volume = Math.min(average / 40, 1); 
+                
+                const el = document.getElementById(elementId);
+                if(el) {
+                    el.style.opacity = volume > 0.1 ? (0.2 + volume * 0.5) : '0';
+                    el.style.transform = `scale(${1 + volume * 0.6})`;
+                }
+                requestAnimationFrame(draw);
             }
-            loop();
+            draw();
         }
 
         function startTimer() {
-            let s = 0; setInterval(() => { s++; let m = Math.floor(s/60), sc = s%60; document.getElementById('timer').innerText = `${m.toString().padStart(2,'0')}:${sc.toString().padStart(2,'0')}`; }, 1000);
+            let seconds = 0;
+            setInterval(() => {
+                seconds++;
+                let m = Math.floor(seconds/60), s = seconds%60;
+                document.getElementById('timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            }, 1000);
         }
+
+        peer.on('error', err => {
+            console.error(err.type);
+            if(err.type === 'peer-unavailable') systemMsg("Usuário não encontrado.");
+        });
     </script>
 </body>
 </html>
